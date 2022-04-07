@@ -6,7 +6,7 @@
 PROJECT = Robot_aspirateur
 
 #Define path to the e-puck2_main-processor folder
-GLOBAL_PATH = C:\Users\Vass\Desktop\Robotique\Codes\lib\e-puck2_main-processor
+GLOBAL_PATH = ../../lib/e-puck2_main-processor
 
 #Source files to include
 CSRC += ./main.c \
