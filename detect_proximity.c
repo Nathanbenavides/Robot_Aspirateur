@@ -41,7 +41,7 @@ static THD_FUNCTION(DetectProximity, arg) {
 //    	chprintf((BaseSequentialStream *)&SDU1, "%4d", wall_angle);
     	palTogglePad(GPIOD, GPIOD_LED1);
         //100Hz
-    	chThdSleepMilliseconds(100);
+    	chThdSleepMilliseconds(150);
     }
 }
 
@@ -59,7 +59,7 @@ void approximate_wall_angle(void){
 	uint16_t closest_sensor_delta = 0;
 
 	for (uint8_t i = 0; i < 8 ; ++i){
-		if(prox_values.delta[i] > 200){  //wall distance detection
+		if(prox_values.delta[i] > 300){  //wall distance detection (big delta = close wall)
 			sensor_see_wall[i] = 1;
 		}
 		else sensor_see_wall[i] = 0;
@@ -84,9 +84,9 @@ void approximate_wall_angle(void){
 		}
 	}
 
-	if((prox_values.delta[0] < prox_values.delta[7] + 50)
-			&& (prox_values.delta[0] > prox_values.delta[7] - 50)
-			&& (prox_values.delta[0] > 100)){
+	if((prox_values.delta[0] < prox_values.delta[7] + 100)
+			&& (prox_values.delta[0] > prox_values.delta[7] - 100)
+			&& (prox_values.delta[0] > 200)){
 		wall_angle = 0;
 		return;
 	}
@@ -98,7 +98,7 @@ void approximate_wall_angle(void){
 			wall_angle = -45;	//front right 2
 			return;
 		case 2:
-			wall_angle = 90;	//right
+			wall_angle = -90;	//right
 			return;
 		case 3:
 			wall_angle = -135;	//back right
