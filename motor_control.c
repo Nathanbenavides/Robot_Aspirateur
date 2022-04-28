@@ -28,6 +28,20 @@ static THD_FUNCTION(MotorControl, arg) {
 			right_motor_set_speed(MOTOR_SPEED_LIMIT/2);
 			left_motor_set_speed(MOTOR_SPEED_LIMIT/2);
 		}
+    	else if((return_wall_angle() >= -10) && (return_wall_angle() <= 10)){
+    		int random_number = rand()%2;
+    		if(random_number == 0){
+    			right_motor_set_speed(-MOTOR_SPEED_LIMIT/2);
+				left_motor_set_speed(MOTOR_SPEED_LIMIT/2);
+				chThdSleepUntilWindowed(time, time + MS2ST(500));
+    		}
+    		else {
+    			right_motor_set_speed(MOTOR_SPEED_LIMIT/2);
+				left_motor_set_speed(-MOTOR_SPEED_LIMIT/2);
+				chThdSleepUntilWindowed(time, time + MS2ST(500));
+    		}
+//    		chprintf((BaseSequentialStream *)&SDU1, "%4d", random_number);
+    	}
     	else if(return_wall_angle() > 0 ){
     		if((return_wall_angle() == 90) && (prox_value_delta(5) > 150)){
     			right_motor_set_speed(-MOTOR_SPEED_LIMIT/2);
@@ -36,7 +50,7 @@ static THD_FUNCTION(MotorControl, arg) {
     		right_motor_set_speed(MOTOR_SPEED_LIMIT/2 - MOTOR_SPEED_LIMIT/2 * (90 - return_wall_angle()));
     		left_motor_set_speed(MOTOR_SPEED_LIMIT/2 + MOTOR_SPEED_LIMIT/2 * (90 - return_wall_angle()));
     	}
-    	else if(return_wall_angle() <= 0){
+    	else if(return_wall_angle() < 0){
     		if((return_wall_angle() == -90) && (prox_value_delta(2) > 150)){
 				right_motor_set_speed(MOTOR_SPEED_LIMIT/2);
 				left_motor_set_speed(-MOTOR_SPEED_LIMIT/2);
