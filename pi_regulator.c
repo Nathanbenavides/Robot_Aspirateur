@@ -10,11 +10,36 @@
 #include <pi_regulator.h>
 #include <process_image.h>
 
-#define KP 200
-#define KI 0.4
-#define GOAL_DIST 10.0
+//simple PI regulator implementation
+int16_t pi_regulator(float distance, float goal){
 
-int16_t PI_fonction(float e);
+	float error = 0;
+	float speed = 0;
+
+	static float sum_error = 0;
+
+	error = distance - goal;
+
+	//disables the PI regulator if the error is to small
+	//this avoids to always move as we cannot exactly be where we want and 
+	//the camera is a bit noisy
+	if(fabs(error) < ERROR_THRESHOLD){
+		return 0;
+	}
+
+	sum_error += error;
+
+	//we set a maximum and a minimum for the sum to avoid an uncontrolled growth
+	if(sum_error > MAX_SUM_ERROR){
+		sum_error = MAX_SUM_ERROR;
+	}else if(sum_error < -MAX_SUM_ERROR){
+		sum_error = -MAX_SUM_ERROR;
+	}
+
+	speed = KP * error + KI * sum_error;
+
+    return (int16_t)speed;
+}
 
 static THD_WORKING_AREA(waPiRegulator, 256);
 static THD_FUNCTION(PiRegulator, arg) {
@@ -25,39 +50,29 @@ static THD_FUNCTION(PiRegulator, arg) {
     systime_t time;
 
     int16_t speed = 0;
+    int16_t speed_correction = 0;
 
     while(1){
         time = chVTGetSystemTime();
-
-        speed = PI_dist(get_distance_cm() - GOAL_DIST);
-
-        if(-150 < speed && speed < 150) speed = 0;
         
-        //applies the speed from the PI regulator
-		right_motor_set_speed(speed);
-		left_motor_set_speed(speed);
+        //computes the speed to give to the motors
+        //distance_cm is modified by the image processing thread
+        speed = pi_regulator(get_distance_cm(), GOAL_DISTANCE);
+        //computes a correction factor to let the robot rotate to be in front of the line
+        speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
 
-//		chprintf((BaseSequentialStream *)&SDU1, "Speed = %d\r\n", speed);
+        //if the line is nearly in front of the camera, don't rotate
+        if(abs(speed_correction) < ROTATION_THRESHOLD){
+        	speed_correction = 0;
+        }
+
+        //applies the speed from the PI regulator and the correction for the rotation
+		right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
+		left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
 
         //100Hz
-        chThdSleepUntilWindowed(time, time + MS2ST(100));
+        chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
-}
-
-int16_t PI_dist(float e){
-	static systime_t time = 0;
-	static int16_t I = 0;
-
-	I = I + KI*(chVTGetSystemTime()-time)*e;
-
-	if(I > 1000)	I = 1000;
-	else if(I < -1000) I = -1000;
-
-	time = chVTGetSystemTime();
-
-//	chprintf((BaseSequentialStream *)&SDU1, "I = %d\t", I);
-
-	return I + KP*e;
 }
 
 void pi_regulator_start(void){
