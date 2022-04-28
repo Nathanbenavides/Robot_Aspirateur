@@ -59,7 +59,7 @@ void approximate_wall_angle(void){
 	uint16_t closest_sensor_delta = 0;
 
 	for (uint8_t i = 0; i < 8 ; ++i){
-		if(prox_values.delta[i] > 70){
+		if(prox_values.delta[i] > 200){  //wall distance detection
 			sensor_see_wall[i] = 1;
 		}
 		else sensor_see_wall[i] = 0;

@@ -37,7 +37,7 @@ static THD_FUNCTION(MotorControl, arg) {
     	}
 
 
-    	chThdSleepUntilWindowed(time, time + MS2ST(5));
+    	chThdSleepUntilWindowed(time, time + MS2ST(20));
     }
 }
 
