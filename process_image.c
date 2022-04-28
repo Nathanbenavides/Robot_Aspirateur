@@ -8,7 +8,13 @@
 
 #include <process_image.h>
 
-#include <selector.h>
+
+static float distance_cm = 0;
+static uint16_t pos_line = 0;
+static uint16_t width_line = 0;
+
+uint8_t get_mean(uint8_t* image);
+void image_width_pos(uint8_t* image);
 
 //semaphore
 static BSEMAPHORE_DECL(image_ready_sem, TRUE);
@@ -20,7 +26,7 @@ static THD_FUNCTION(CaptureImage, arg) {
     (void)arg;
 
 	//Takes pixels 0 to IMAGE_BUFFER_SIZE of the line 10 + 11 (minimum 2 lines because reasons)
-	po8030_advanced_config(FORMAT_RGB565, 0, 10, IMAGE_BUFFER_SIZE, 2, SUBSAMPLING_X1, SUBSAMPLING_X1);
+	po8030_advanced_config(FORMAT_RGB565, 0, 200, IMAGE_BUFFER_SIZE, 2, SUBSAMPLING_X1, SUBSAMPLING_X1);
 	dcmi_enable_double_buffering();
 	dcmi_set_capture_mode(CAPTURE_ONE_SHOT);
 	dcmi_prepare();
@@ -36,49 +42,71 @@ static THD_FUNCTION(CaptureImage, arg) {
 }
 
 
-static THD_WORKING_AREA(waProcessImage, 3072);
+static THD_WORKING_AREA(waProcessImage, 1024);
 static THD_FUNCTION(ProcessImage, arg) {
 
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
 
-    static int select = 0;
 	uint8_t *img_buff_ptr;
-	uint8_t imageR[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t imageG[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t imageB[IMAGE_BUFFER_SIZE] = {0};
+	uint8_t image[IMAGE_BUFFER_SIZE] = {0};
 
     while(1){
     	//waits until an image has been captured
         chBSemWait(&image_ready_sem);
 
+        	//static uint16_t time = 0;
+        	//chprintf((BaseSequentialStream *)&SD3, "time = %d \n", chVTGetSystemTime()- time);
+        	//time = chVTGetSystemTime();
+
 		//gets the pointer to the array filled with the last image in RGB565    
 		img_buff_ptr = dcmi_get_last_image_ptr();
 
-		if(get_selector() == select){
-
-		chprintf((BaseSequentialStream *)&SDU1, "image start\r\n");
-
-		for(uint16_t j = 0; j < 480; j++){
-			chprintf((BaseSequentialStream *)&SDU1, "{ ");
-			uint16_t k = PO8030_MAX_WIDTH*2*j;
-
-			for(uint16_t i = 0; i < PO8030_MAX_WIDTH*2; i+=2){
-
-				imageR[i/2] = (img_buff_ptr[i+k] & 0xF8)>>3;
-				imageG[i/2] = ((img_buff_ptr[i+k] & 0x7)<<3) + ((img_buff_ptr[i+k+1] & 0xE0)>>5);
-				imageB[i/2] = img_buff_ptr[i+1+k] & 31;
-
-
-				chprintf((BaseSequentialStream *)&SDU1, "{%d , %d , %d}, ", imageR[i/2], imageG[i/2], imageB[i/2]);
-			}
-			chprintf((BaseSequentialStream *)&SDU1, " }, ");
-    	}
-		chprintf((BaseSequentialStream *)&SDU1, "\r\n");
-
-		select = get_selector();
+		for(uint16_t i = 0; i < PO8030_MAX_WIDTH*2; i+=2){
+			image[i/2] = img_buff_ptr[i+1] & 31;
 		}
+
+		SendUint8ToComputer(image, PO8030_MAX_WIDTH);
+
+		image_width_pos(image);
+
+		distance_cm = 1350.00/width_line;
+
+//		chprintf((BaseSequentialStream *)&SDU1, "Width = %d Pos = %d dist = %.2f\r\n", width_line, pos_line, distance_cm);
     }
+}
+
+uint8_t get_mean(uint8_t* image){
+	uint8_t max = image[0];
+	uint8_t min = image[0];
+	for(uint16_t i = 1; i < PO8030_MAX_WIDTH; i++){
+		max = ( (max > image[i]) ? max : image[i] );
+		min = ( (min < image[i]) ? min : image[i] );
+	}
+
+	return (max-min)/3;
+}
+
+void image_width_pos(uint8_t* image){
+	uint16_t width = 0;
+	uint16_t somme_pos = 0;
+	uint8_t mean = get_mean(image);
+
+	for(uint16_t i = 0; i < PO8030_MAX_WIDTH; i++){
+		if(image[i]<mean){
+			width++;
+			somme_pos += i;
+		}
+	}
+
+	width_line = width;
+	pos_line = somme_pos/width;
+}
+
+
+float get_distance_cm(void){
+
+	return distance_cm;
 }
 
 void process_image_start(void){
