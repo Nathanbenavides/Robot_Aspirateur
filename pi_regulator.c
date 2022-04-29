@@ -12,9 +12,15 @@
 
 #define KP_dist						200
 #define KI_dist						0.4	//must not be zero
-#define KP_pos						800.0f
-#define KI_pos 						3.5f	//must not be zero
+
+#define KP_pos						2
+#define KI_pos 						0	//must not be zero
+
 #define MAX_SUM_ERROR 			(MOTOR_SPEED_LIMIT)
+
+#define ERROR_MIN				0.5f
+
+#define MIN_DISTANCE			2.0f
 
 //simple PI regulator implementation
 int16_t PI_dist(float e){
@@ -28,7 +34,7 @@ int16_t PI_dist(float e){
 
 	time = chVTGetSystemTime();
 
-	int16_t y = I + KP_pos*e;
+	int16_t y = I + KP_dist*e;
 
 	return (y < 150 && -150 < y)? 0 : y;
 }
@@ -60,23 +66,26 @@ static THD_FUNCTION(PiRegulator, arg) {
     int16_t speed = 0;
     int16_t speed_correction = 0;
 
+    float goal_dist = GOAL_DISTANCE;
+
     while(1){
         time = chVTGetSystemTime();
         
         //computes the speed to give to the motors
         //distance_cm is modified by the image processing thread
-        speed = PI_dist(get_distance_cm() - GOAL_DISTANCE);
+        speed = PI_dist(get_distance_cm() - goal_dist);
         //computes a correction factor to let the robot rotate to be in front of the line
         speed_correction = PI_pos(get_line_position() - (IMAGE_BUFFER_SIZE/2));
 
-        //if the line is nearly in front of the camera, don't rotate
-        if(abs(speed_correction) < ROTATION_THRESHOLD){
-        	speed_correction = 0;
-        }
+        if(-MIN_SPEED_MOTOR < speed && speed < MIN_SPEED_MOTOR) speed = 0;
+        if(-MIN_SPEED_MOTOR < speed_correction && speed_correction < MIN_SPEED_MOTOR) speed_correction = 0;
+
 
         //applies the speed from the PI regulator and the correction for the rotation
-		right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
-		left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
+		right_motor_set_speed(speed - speed_correction);
+		left_motor_set_speed(speed + speed_correction);
+
+		if(fabs(get_distance_cm() - goal_dist) < ERROR_MIN && goal_dist > MIN_DISTANCE && speed == 0) goal_dist-=0.5;
 
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
