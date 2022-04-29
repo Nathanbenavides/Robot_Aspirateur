@@ -10,6 +10,8 @@
 #include <pi_regulator.h>
 #include <process_image.h>
 
+#include <leds.h>
+
 #define KP_dist						200
 #define KI_dist						0.4	//must not be zero
 
@@ -69,24 +71,34 @@ static THD_FUNCTION(PiRegulator, arg) {
     float goal_dist = GOAL_DISTANCE;
 
     while(1){
-        time = chVTGetSystemTime();
+    	time = chVTGetSystemTime();
         
-        //computes the speed to give to the motors
-        //distance_cm is modified by the image processing thread
-        speed = PI_dist(get_distance_cm() - goal_dist);
-        //computes a correction factor to let the robot rotate to be in front of the line
-        speed_correction = PI_pos(get_line_position() - (IMAGE_BUFFER_SIZE/2));
+        if(get_distance_cm() != 0){
 
-        if(-MIN_SPEED_MOTOR < speed && speed < MIN_SPEED_MOTOR) speed = 0;
-        if(-MIN_SPEED_MOTOR < speed_correction && speed_correction < MIN_SPEED_MOTOR) speed_correction = 0;
+        	set_led(LED1, 1);
+
+        	//computes the speed to give to the motors
+        	//distance_cm is modified by the image processing thread
+        	speed = PI_dist(get_distance_cm() - goal_dist);
+        	//computes a correction factor to let the robot rotate to be in front of the line
+        	speed_correction = PI_pos(get_line_position() - (IMAGE_BUFFER_SIZE/2));
+
+        	if(-MIN_SPEED_MOTOR < speed && speed < MIN_SPEED_MOTOR) speed = 0;
+        	if(-MIN_SPEED_MOTOR < speed_correction && speed_correction < MIN_SPEED_MOTOR) speed_correction = 0;
 
 
-        //applies the speed from the PI regulator and the correction for the rotation
-		right_motor_set_speed(speed - speed_correction);
-		left_motor_set_speed(speed + speed_correction);
+        	//applies the speed from the PI regulator and the correction for the rotation
+        	right_motor_set_speed(speed - speed_correction);
+        	left_motor_set_speed(speed + speed_correction);
 
-		if(fabs(get_distance_cm() - goal_dist) < ERROR_MIN && goal_dist > MIN_DISTANCE && speed == 0) goal_dist-=0.5;
-
+        	if(fabs(get_distance_cm() - goal_dist) < ERROR_MIN && goal_dist > MIN_DISTANCE && speed == 0) goal_dist-=0.5;
+        }
+        else{
+        	right_motor_set_speed(0);
+        	left_motor_set_speed(0);
+        	set_led(LED1, 0);
+        	set_led(LED3, 1);
+        }
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }

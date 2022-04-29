@@ -25,8 +25,6 @@ uint16_t extract_line_width(uint8_t *buffer){
 	uint8_t stop = 0, wrong_line = 0, line_not_found = 0;
 	uint32_t mean = 0;
 
-	static uint16_t last_width = PXTOCM/GOAL_DISTANCE;
-
 	//performs an average
 	for(uint16_t i = 0 ; i < IMAGE_BUFFER_SIZE ; i++){
 		mean += buffer[i];
@@ -85,9 +83,9 @@ uint16_t extract_line_width(uint8_t *buffer){
 	if(line_not_found){
 		begin = 0;
 		end = 0;
-		width = last_width;
+		return width = 0;
 	}else{
-		last_width = width = (end - begin);
+		width = (end - begin);
 		line_position = (begin + end)/2; //gives the line position.
 	}
 
@@ -151,9 +149,10 @@ static THD_FUNCTION(ProcessImage, arg) {
 		lineWidth = extract_line_width(image);
 
 		//converts the width into a distance between the robot and the camera
-		if(lineWidth){
-			distance_cm = PXTOCM/lineWidth;
-		}
+		if(lineWidth) distance_cm = PXTOCM/lineWidth;
+		else distance_cm = 0;
+
+//		chprintf((BaseSequentialStream *)&SDU1, "Width = %d Pos = %d dist = %.2f\r\n", lineWidth, line_position, distance_cm);
 
 		if(send_to_computer){
 			//sends to the computer the image
