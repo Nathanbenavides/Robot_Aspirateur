@@ -34,6 +34,22 @@ static void serial_start(void)
 	sdStart(&SD3, &ser_cfg); // UART3.
 }
 
+void fct_sleep(){
+
+}
+void fct_exit(){
+
+}
+void fct_clean(){
+
+}
+void fct_research(){
+
+}
+void fct_park(){
+
+}
+
 int main(void)
 {
 
@@ -56,8 +72,42 @@ int main(void)
 	process_image_start();
 
     /* Infinite loop. */
+
+	enum state current_state = SLEEP;
+	enum state last_state = SLEEP;
+
     while (1) {
-    	//waits 1 second
+
+    	switch(current_state){
+    	case SLEEP :
+    		{
+    		if(current_state != last_state) fct_sleep();
+    		}
+    	    	break;
+    	case EXIT :
+			{
+			if(current_state != last_state) fct_exit();
+			}
+		break;
+		case CLEAN :
+			{
+			if(current_state != last_state) fct_clean();
+			}
+		break;
+    	case RESEARCH :
+			{
+			if(current_state != last_state) fct_research();
+			}
+		break;
+    	case PARK :
+			{
+			if(current_state != last_state) fct_park();
+			}
+		break;
+    	}
+
+    	last_stat = current_state;
+
         chThdSleepMilliseconds(1000);
     }
 }

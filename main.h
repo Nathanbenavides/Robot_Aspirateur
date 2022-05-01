@@ -22,6 +22,7 @@ extern "C" {
 #define GOAL_DISTANCE 			10.0f
 #define MIN_SPEED_MOTOR			150
 
+enum stat {SLEEP, EXIT, CLEAN, RESEARCH, PARK};
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;
