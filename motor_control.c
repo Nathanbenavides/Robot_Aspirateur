@@ -12,7 +12,7 @@
 #include <motors.h>
 
 
-
+static thread_t *tp;
 static THD_WORKING_AREA(waMotorControl, 256);
 static THD_FUNCTION(MotorControl, arg) {
 
@@ -40,7 +40,6 @@ static THD_FUNCTION(MotorControl, arg) {
 				left_motor_set_speed(-MOTOR_SPEED_LIMIT/2);
 				chThdSleepUntilWindowed(time, time + MS2ST(500));
     		}
-//    		chprintf((BaseSequentialStream *)&SDU1, "%4d", random_number);
     	}
     	else if(return_wall_angle() > 0 ){
     		if((return_wall_angle() == 90) && (prox_value_delta(5) > 150)){
@@ -65,6 +64,9 @@ static THD_FUNCTION(MotorControl, arg) {
 }
 
 void motor_control_start(void){
-	chThdCreateStatic(waMotorControl, sizeof(waMotorControl), NORMALPRIO+1, MotorControl, NULL);
+	tp = chThdCreateStatic(waMotorControl, sizeof(waMotorControl), NORMALPRIO+1, MotorControl, NULL);
 }
 
+void motor_control_stop(void){
+	chThdTerminate(tp);
+}
