@@ -8,7 +8,7 @@
 #include "proximity.h"
 #include <detect_proximity.h>
 
-
+static thread_t *tp;
 static proximity_msg_t prox_values;
 static int wall_angle = 0;
 static bool wall_detected = 0;
@@ -48,7 +48,11 @@ static THD_FUNCTION(DetectProximity, arg) {
 
 
 void detect_proximity_start(void){
-	chThdCreateStatic(waDetectProximity, sizeof(waDetectProximity), NORMALPRIO+1, DetectProximity, NULL);
+	tp = chThdCreateStatic(waDetectProximity, sizeof(waDetectProximity), NORMALPRIO+1, DetectProximity, NULL);
+}
+
+void detect_proximity_stop(void){
+	chThdTerminate(tp);
 }
 
 
