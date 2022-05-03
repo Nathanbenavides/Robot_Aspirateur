@@ -87,35 +87,35 @@ int main(void)
 
     while (1) {
 
-    	switch(current_state){
-    	case SLEEP :
-    		{
-    		if(current_state != last_state) fct_sleep();
-    		}
-    	    	break;
-    	case EXIT :
-			{
-			if(current_state != last_state) fct_exit();
-			}
-		break;
-		case CLEAN :
-			{
-			if(current_state != last_state) fct_clean();
-			}
-		break;
-    	case RESEARCH :
-			{
-			if(current_state != last_state) fct_research();
-			}
-		break;
-    	case PARK :
-			{
-			if(current_state != last_state) fct_park();
-			}
-		break;
-    	}
+//    	switch(current_state){
+//    	case SLEEP :
+//    		{
+//    		if(current_state != last_state) fct_sleep();
+//    		}
+//    	    	break;
+//    	case EXIT :
+//			{
+//			if(current_state != last_state) fct_exit();
+//			}
+//		break;
+//		case CLEAN :
+//			{
+//			if(current_state != last_state) fct_clean();
+//			}
+//		break;
+//    	case RESEARCH :
+//			{
+//			if(current_state != last_state) fct_research();
+//			}
+//		break;
+//    	case PARK :
+//			{
+//			if(current_state != last_state) fct_park();
+//			}
+//		break;
+//    	}
 
-    	last_stat = current_state;
+//    	last_state = current_state;
 
         chThdSleepMilliseconds(1000);
     }
