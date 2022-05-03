@@ -13,8 +13,8 @@
 
 #include <leds.h>
 
-#define KP_dist						30
-#define KI_dist						0.1	//must not be zero
+#define KP_dist						15
+#define KI_dist						0.05	//must not be zero
 
 #define KP_pos						2
 #define KI_pos 						0	//must not be zero
@@ -81,19 +81,30 @@ static THD_FUNCTION(PiRegulator, arg) {
 
     systime_t time;
 
+    uint16_t distance_mm = 0;
+    uint16_t line_position = 0;
+
     int16_t speed = 0;
     int16_t speed_correction = 0;
 
     float goal_dist = 100;
 
-    PI_dist(0, 1);
-    PI_pos(0, 1);
-
     while(1){
+
+    	if(PiRegulator_configured == 0){
+    		PI_dist(0, 1);
+    		PI_pos(0, 1);
+    	do{
+    		goal_dist = VL53L0X_get_dist_mm() - TOF_OFFSET;
+    		chThdSleepMilliseconds(500);
+    	}while(goal_dist <= 0);
+    		PiRegulator_configured = 1;
+    	}
+
     	time = chVTGetSystemTime();
 
-    	uint16_t distance_mm = VL53L0X_get_dist_mm() - TOF_OFFSET;
-    	uint16_t line_position = get_line_position();
+    	distance_mm = VL53L0X_get_dist_mm() - TOF_OFFSET;
+    	line_position = get_line_position();
 
 		//computes the speed to give to the motors
 		//distance_cm is modified by the image processing thread
@@ -104,13 +115,20 @@ static THD_FUNCTION(PiRegulator, arg) {
 		if(-MIN_SPEED_MOTOR < speed && speed < MIN_SPEED_MOTOR) speed = 0;
 		if(-MIN_SPEED_MOTOR < speed_correction && speed_correction < MIN_SPEED_MOTOR) speed_correction = 0;
 
-//		chprintf((BaseSequentialStream *)&SDU1, "Pos = %d dist = %d goal = %.2f\r\n", line_position, distance_mm, goal_dist);
+		//chprintf((BaseSequentialStream *)&SDU1, "Pos = %d dist = %d goal = %.2f\r\n", line_position, distance_mm, goal_dist);
 
 		//applies the speed from the PI regulator and the correction for the rotation
 		right_motor_set_speed(speed - speed_correction);
 		left_motor_set_speed(speed + speed_correction);
 
-		if(fabs(distance_mm - goal_dist) < ERROR_MIN && goal_dist > MIN_DISTANCE && speed == 0) goal_dist-=5;
+		if(goal_dist > MIN_DISTANCE) goal_dist-=0.5;
+		else{
+			set_body_led(1);
+			right_motor_set_speed(0);
+			left_motor_set_speed(0);
+			chThdSleepMilliseconds(5000);
+
+		}
 
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
@@ -124,8 +142,6 @@ void pi_regulator_start(void){
 
 	piThd = chThdCreateStatic(waPiRegulator, sizeof(waPiRegulator), NORMALPRIO, PiRegulator, NULL);
 	VL53L0X_start();
-
-	PiRegulator_configured = 1;
 }
 
 
