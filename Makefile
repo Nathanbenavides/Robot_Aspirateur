@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 #This is a template to build your own project with the e-puck2_main-processor folder as a library.
 #Simply adapt the lines below to be able to compile
@@ -12,6 +13,8 @@ GLOBAL_PATH = ../../lib/e-puck2_main-processor
 CSRC += ./main.c \
 		./process_image.c \
 		./pi_regulator.c \
+		./detect_proximity.c \
+		./motor_control.c \
 
 #Header folders to include
 INCDIR += 
