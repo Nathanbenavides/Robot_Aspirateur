@@ -6,6 +6,7 @@
 #include <chprintf.h>
 
 #include "proximity.h"
+#include <process_image.h>
 #include <main.h>
 #include <detect_proximity.h>
 #include <motor_control.h>
@@ -71,12 +72,15 @@ static THD_FUNCTION(FindLine, arg) {
 
 
     while(1){
-    	right_motor_set_speed(MOTOR_SPEED_LIMIT/2);
-		left_motor_set_speed(-MOTOR_SPEED_LIMIT/2);
-		//message if line detected
-		//(void)chMsgSend(thread PID)
-
-    	chThdSleepMilliseconds(150);
+    	right_motor_set_speed(MOTOR_SPEED_LIMIT/4);
+		left_motor_set_speed(-MOTOR_SPEED_LIMIT/4);
+		if(return_line_detected()){
+			Send(PARK);
+		}
+		else{
+			Send(CLEAN);
+		}
+    	chThdSleepUntilWindowed(time, time+1000);
     }
 }
 

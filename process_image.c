@@ -11,6 +11,7 @@
 
 static float distance_cm = 0;
 static uint16_t line_position = IMAGE_BUFFER_SIZE/2;	//middle
+static uint8_t line_detected = 0; //0 if no line, 1 if line detected
 
 //semaphore
 static BSEMAPHORE_DECL(image_ready_sem, TRUE);
@@ -83,6 +84,7 @@ uint16_t extract_line_width(uint8_t *buffer){
 	if(line_not_found){
 		begin = 0;
 		end = 0;
+		line_detected = 0;
 		return width = 0;
 	}else{
 		width = (end - begin);
@@ -91,8 +93,10 @@ uint16_t extract_line_width(uint8_t *buffer){
 
 	//sets a maximum width or returns the measured width
 	if((PXTOCM/width) > MAX_DISTANCE){
+		line_detected = 0;
 		return PXTOCM/MAX_DISTANCE;
 	}else{
+		line_detected = 1;
 		return width;
 	}
 }
@@ -174,4 +178,8 @@ uint16_t get_line_position(void){
 void process_image_start(void){
 	chThdCreateStatic(waProcessImage, sizeof(waProcessImage), NORMALPRIO, ProcessImage, NULL);
 	chThdCreateStatic(waCaptureImage, sizeof(waCaptureImage), NORMALPRIO, CaptureImage, NULL);
+}
+
+uint8_t return_line_detected(){
+	return line_detected;
 }
