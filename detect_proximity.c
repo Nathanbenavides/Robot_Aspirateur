@@ -5,7 +5,7 @@
 #include <chprintf.h>
 
 #include <main.h>
-#include "proximity.h"
+#include <sensors/proximity.h>
 #include <detect_proximity.h>
 
 static thread_t *tp;
