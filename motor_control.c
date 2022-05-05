@@ -11,7 +11,6 @@
 #include <motor_control.h>
 #include <motors.h>
 
-
 static thread_t *tp;
 static THD_WORKING_AREA(waMotorControl, 256);
 static THD_FUNCTION(MotorControl, arg) {
@@ -61,6 +60,28 @@ static THD_FUNCTION(MotorControl, arg) {
 
     	chThdSleepUntilWindowed(time, time + MS2ST(20));
     }
+}
+
+static THD_WORKING_AREA(waFindLine, 256);
+static THD_FUNCTION(FindLine, arg) {
+
+    chRegSetThreadName(__FUNCTION__);
+    (void)arg;
+    systime_t time;
+
+
+    while(1){
+    	right_motor_set_speed(MOTOR_SPEED_LIMIT/2);
+		left_motor_set_speed(-MOTOR_SPEED_LIMIT/2);
+		//message if line detected
+		//(void)chMsgSend(thread PID)
+
+    	chThdSleepMilliseconds(150);
+    }
+}
+
+void find_line_start(void){
+	chThdCreateStatic(waFindLine, sizeof(waFindLine), NORMALPRIO+2, FindLine, NULL);
 }
 
 void motor_control_start(void){
