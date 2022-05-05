@@ -11,7 +11,7 @@
 #include <motors.h>
 #include <camera/po8030.h>
 #include <chprintf.h>
-#include "proximity.h"
+#include <sensors/proximity.h>
 
 #include <detect_proximity.h>
 #include <motor_control.h>
@@ -46,8 +46,14 @@ static void serial_start(void)
 	sdStart(&SD3, &ser_cfg); // UART3.
 }
 
-void Send(enum state etat){
-	 (void)chMsgSend(fsm, (msg_t)etat);
+void send(enum state etat){
+	(void)chMsgSend(fsm, (msg_t)(etat+1));
+}
+
+void receive(){
+    thread_t *tp = chMsgWait();
+    msg_t msg = chMsgGet(tp);
+    current_state = msg-1;
 }
 
 void fct_sleep(){
@@ -65,6 +71,27 @@ void fct_research(){
 void fct_park(){
 
 }
+
+
+static THD_WORKING_AREA(waMainFSM, 256);
+static THD_FUNCTION(MainFSM, arg) {
+
+    chRegSetThreadName(__FUNCTION__);
+    (void)arg;
+
+
+
+    while(1){
+    	switch(current_state){
+			case SLEEP : fct_sleep(); break;
+			case EXIT : fct_exit(); break;
+			case CLEAN : fct_clean(); break;
+			case RESEARCH : fct_research(); break;
+			case PARK : fct_park();	break;
+    	}
+    }
+}
+
 
 int main(void)
 {
@@ -95,16 +122,6 @@ int main(void)
     /* Infinite loop. */
 
     while (1) {
-
-    	switch(current_state){
-    		case SLEEP : fct_sleep(); break;
-    		case EXIT : fct_exit(); break;
-    		case CLEAN : fct_clean(); break;
-    		case RESEARCH : fct_research(); break;
-    		case PARK : fct_park();	break;
-    	}
-
-
         chThdSleepMilliseconds(1000);
     }
 }
