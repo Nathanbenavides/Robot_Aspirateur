@@ -26,6 +26,15 @@ extern "C" {
 
 #define TOF_OFFSET				20
 
+#define PI                  3.1415926536f
+#define WHEEL_DISTANCE      5.35f    //cm
+#define NSTEP_ONE_TURN      1000 // number of step for 1 turn of the motor
+#define WHEEL_PERIMETER     13 // [cm]
+
+
+#define LOW_SPEED				200
+#define TIME_WAIT_360_DEG		(PI*WHEEL_DISTANCE/WHEEL_PERIMETER*NSTEP_ONE_TURN/LOW_SPEED*1000)
+
 enum state {SLEEP, EXIT, CLEAN, RESEARCH, PARK};
 
 /** Robot wide IPC bus. */

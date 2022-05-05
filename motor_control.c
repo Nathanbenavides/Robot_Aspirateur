@@ -5,8 +5,7 @@
 #include <usbcfg.h>
 #include <chprintf.h>
 
-#include "proximity.h"
-#include <process_image.h>
+#include <sensors/proximity.h>
 #include <main.h>
 #include <detect_proximity.h>
 #include <motor_control.h>

@@ -18,11 +18,15 @@
 #include <camera/po8030.h>
 #include <chprintf.h>
 #include <sensors/proximity.h>
+#include <selector.h>
+#include <leds.h>
 
 #include <detect_proximity.h>
 #include <motor_control.h>
 #include <pi_regulator.h>
 #include <process_image.h>
+
+#define GO_BACK_TIME 3000
 
 // initialisation mutex proximity sensor
 messagebus_t bus;
@@ -63,9 +67,25 @@ void receive(){
 }
 
 void fct_sleep(){
-
+	uint8_t selector = get_selector();
+	set_body_led(1);
+	do{
+		chThdSleepMilliseconds(500);
+	}while(selector == get_selector());
+	set_body_led(0);
+	chThdSleepMilliseconds(1000);
+	current_state = EXIT;
 }
 void fct_exit(){
+	left_motor_set_speed(-LOW_SPEED);
+	right_motor_set_speed(-LOW_SPEED);
+	chThdSleepMilliseconds(GO_BACK_TIME);
+	left_motor_set_speed(-LOW_SPEED);
+	right_motor_set_speed(LOW_SPEED);
+	chThdSleepMilliseconds(TIME_WAIT_360_DEG/2);
+	left_motor_set_speed(0);
+	right_motor_set_speed(0);
+	current_state = EXIT;
 
 }
 void fct_clean(){
@@ -125,8 +145,8 @@ int main(void)
 
 
 	//stars the threads for the pi regulator and the processing of the image
-	pi_regulator_start();
-	process_image_start();
+	//pi_regulator_start();
+	//process_image_start();
 
     /* Infinite loop. */
 
