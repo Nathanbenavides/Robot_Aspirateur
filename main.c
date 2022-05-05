@@ -17,10 +17,19 @@
 #include <motors.h>
 #include <camera/po8030.h>
 #include <chprintf.h>
+#include "proximity.h"
 
+#include <detect_proximity.h>
+#include <motor_control.h>
 #include <pi_regulator.h>
 #include <process_image.h>
 
+// initialisation mutex proximity sensor
+messagebus_t bus;
+MUTEX_DECL(bus_lock);
+CONDVAR_DECL(bus_condvar);
+
+//variable pour fsm
 static thread_t *fsm;
 static enum state current_state = SLEEP;
 
@@ -82,6 +91,11 @@ int main(void)
 	po8030_start();
 	//inits the motors
 	motors_init();
+
+    //proximity_start();
+    messagebus_init(&bus, &bus_lock, &bus_condvar);
+
+
 
 	//stars the threads for the pi regulator and the processing of the image
 	pi_regulator_start();
