@@ -58,7 +58,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-.settings
-build
-.dep
+
+.settings/
 
