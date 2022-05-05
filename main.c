@@ -28,7 +28,7 @@ MUTEX_DECL(bus_lock);
 CONDVAR_DECL(bus_condvar);
 
 //variable pour fsm
-static thread_t *fsm;
+static thread_t *fsmThd;
 static enum state current_state = SLEEP;
 
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
@@ -51,7 +51,7 @@ static void serial_start(void)
 }
 
 void send(enum state etat){
-	(void)chMsgSend(fsm, (msg_t)(etat+1));
+	(void)chMsgSend(fsmThd, (msg_t)(etat+1));
 }
 
 void receive(){
@@ -79,7 +79,7 @@ void fct_exit(){
 	chThdSleepMilliseconds(TIME_WAIT_360_DEG/2);
 	left_motor_set_speed(0);
 	right_motor_set_speed(0);
-	current_state = EXIT;
+	current_state = SLEEP;
 
 }
 void fct_clean(){
@@ -138,6 +138,8 @@ int main(void)
 	//stars the threads for the pi regulator and the processing of the image
 	//pi_regulator_start();
 	//process_image_start();
+
+    fsmThd = chThdCreateStatic(waMainFSM, sizeof(waMainFSM), NORMALPRIO, MainFSM, NULL);
 
     /* Infinite loop. */
 
