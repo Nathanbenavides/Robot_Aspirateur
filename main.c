@@ -21,6 +21,9 @@
 #include <pi_regulator.h>
 #include <process_image.h>
 
+static thread_t *fsm;
+static enum state current_state = SLEEP;
+
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
 {
 	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)"START", 5);
@@ -38,6 +41,10 @@ static void serial_start(void)
 	};
 
 	sdStart(&SD3, &ser_cfg); // UART3.
+}
+
+void Send(enum state etat){
+	 (void)chMsgSend(fsm, (msg_t)etat);
 }
 
 void fct_sleep(){
@@ -82,40 +89,16 @@ int main(void)
 
     /* Infinite loop. */
 
-	enum state current_state = SLEEP;
-	enum state last_state = SLEEP;
-
     while (1) {
 
-//    	switch(current_state){
-//    	case SLEEP :
-//    		{
-//    		if(current_state != last_state) fct_sleep();
-//    		}
-//    	    	break;
-//    	case EXIT :
-//			{
-//			if(current_state != last_state) fct_exit();
-//			}
-//		break;
-//		case CLEAN :
-//			{
-//			if(current_state != last_state) fct_clean();
-//			}
-//		break;
-//    	case RESEARCH :
-//			{
-//			if(current_state != last_state) fct_research();
-//			}
-//		break;
-//    	case PARK :
-//			{
-//			if(current_state != last_state) fct_park();
-//			}
-//		break;
-//    	}
+    	switch(current_state){
+    		case SLEEP : fct_sleep(); break;
+    		case EXIT : fct_exit(); break;
+    		case CLEAN : fct_clean(); break;
+    		case RESEARCH : fct_research(); break;
+    		case PARK : fct_park();	break;
+    	}
 
-//    	last_state = current_state;
 
         chThdSleepMilliseconds(1000);
     }
