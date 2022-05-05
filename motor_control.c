@@ -5,7 +5,8 @@
 #include <usbcfg.h>
 #include <chprintf.h>
 
-#include <sensors/proximity.h>
+#include "sensors/proximity.h"
+#include <process_image.h>
 #include <main.h>
 #include <detect_proximity.h>
 #include <motor_control.h>
@@ -62,33 +63,10 @@ static THD_FUNCTION(MotorControl, arg) {
     }
 }
 
-static THD_WORKING_AREA(waFindLine, 256);
-static THD_FUNCTION(FindLine, arg) {
 
-    chRegSetThreadName(__FUNCTION__);
-    (void)arg;
-    systime_t time;
-
-
-    while(1){
-    	right_motor_set_speed(MOTOR_SPEED_LIMIT/4);
-		left_motor_set_speed(-MOTOR_SPEED_LIMIT/4);
-		if(return_line_detected()){
-			Send(PARK);
-		}
-		else{
-			Send(CLEAN);
-		}
-    	chThdSleepUntilWindowed(time, time+1000);
-    }
-}
-
-void find_line_start(void){
-	chThdCreateStatic(waFindLine, sizeof(waFindLine), NORMALPRIO+2, FindLine, NULL);
-}
 
 void motor_control_start(void){
-	tp = chThdCreateStatic(waMotorControl, sizeof(waMotorControl), NORMALPRIO+1, MotorControl, NULL);
+	chThdCreateStatic(waMotorControl, sizeof(waMotorControl), NORMALPRIO+1, MotorControl, NULL);
 }
 
 void motor_control_stop(void){
