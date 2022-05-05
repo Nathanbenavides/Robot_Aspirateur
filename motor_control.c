@@ -5,16 +5,13 @@
 #include <usbcfg.h>
 #include <chprintf.h>
 
-<<<<<<< HEAD
-#include <sensors/proximity.h>
-=======
-#include "sensors/proximity.h"
-#include <process_image.h>
->>>>>>> Nathan
 #include <main.h>
+#include <motors.h>
+#include <sensors/proximity.h>
+
 #include <detect_proximity.h>
 #include <motor_control.h>
-#include <motors.h>
+#include <process_image.h>
 
 static thread_t *tp;
 static THD_WORKING_AREA(waMotorControl, 256);
