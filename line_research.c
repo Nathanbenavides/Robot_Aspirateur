@@ -7,10 +7,13 @@
 
 #include <main.h>
 #include <motors.h>
+#include <motor_control.h>
 #include <line_research.h>
 #include <process_image.h>
 
-
+static thread_t *searchThd;
+static bool search_line = 0;
+static bool line_found = 0;
 static THD_WORKING_AREA(waFindLine, 256);
 static THD_FUNCTION(FindLine, arg) {
 
@@ -19,31 +22,48 @@ static THD_FUNCTION(FindLine, arg) {
     systime_t time = chVTGetSystemTime();
 
 
-    while(1){
-    	systime_t time_search = chVTGetSystemTime();
-    	while(1){
+    while(1){ //faire un bool modifié par motor_control pour dire quand il cherche la ligne
+    	if (search_line){
+    		set_motor_control_active(0);
 
-    		right_motor_set_speed(MOTOR_SPEED_LIMIT/3);
-    		left_motor_set_speed(-MOTOR_SPEED_LIMIT/3);
-    		if(return_line_detected()){
-    			right_motor_set_speed(0);
+			systime_t time_search = chVTGetSystemTime();
+
+//			motor_control_stop();
+			while(!((time_search + MS2ST(5000)) < chVTGetSystemTime())){
+
+				right_motor_set_speed(MOTOR_SPEED_LIMIT/4);
+				left_motor_set_speed(-MOTOR_SPEED_LIMIT/4);
+				if(return_line_detected()){
+					palTogglePad(GPIOD, GPIOD_LED1);
+					line_found = 1;
+					break;
+				}
+				chThdSleepUntilWindowed(time, time + MS2ST(100));
+			}
+			if(line_found){
+				right_motor_set_speed(0);
 				left_motor_set_speed(0);
-				chThdSleepMilliseconds(100);
-//    			Send(PARK);
-    		}
-    		chThdSleepMilliseconds(100);
-    		if(time_search + 6000 < chVTGetSystemTime()) {
-    			break;
-    		}
+			}
+			else{
+				search_line = 0;
+				set_time_running(5000);
+				set_motor_control_active(1);
+			}
     	}
-    	right_motor_set_speed(MOTOR_SPEED_LIMIT/2);
-		left_motor_set_speed(MOTOR_SPEED_LIMIT/2);
-//		Send(CLEAN);
-		chThdSleepMilliseconds(100);
+    	else{
+    	chThdSleepMilliseconds(200);
+    	}
     }
+
 }
 
 void find_line_start(void){
-	chThdCreateStatic(waFindLine, sizeof(waFindLine), NORMALPRIO+2, FindLine, NULL);
+	searchThd = chThdCreateStatic(waFindLine, sizeof(waFindLine), NORMALPRIO, FindLine, NULL);
 }
+
+void set_search_line(bool set_search_line){
+	search_line = set_search_line;
+	return;
+}
+
 
