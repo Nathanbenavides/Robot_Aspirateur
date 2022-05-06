@@ -122,12 +122,10 @@ static THD_FUNCTION(PiRegulator, arg) {
 		left_motor_set_speed(speed + speed_correction);
 
 		if(goal_dist > MIN_DISTANCE) goal_dist-=0.5;
-		else{
-			set_body_led(1);
+		else if(speed == 0){
 			right_motor_set_speed(0);
 			left_motor_set_speed(0);
-			chThdSleepMilliseconds(5000);
-
+			send(SLEEP);
 		}
 
         //100Hz
