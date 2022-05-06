@@ -66,7 +66,7 @@ void receive(){
     current_state = msg-1;
 }
 
-void fct_sleep(){
+void fct_sleep(void){
 	uint8_t selector = get_selector();
 	set_body_led(1);
 	do{
@@ -76,7 +76,7 @@ void fct_sleep(){
 	chThdSleepMilliseconds(1000);
 	current_state = EXIT;
 }
-void fct_exit(){
+void fct_exit(void){
 	left_motor_set_speed(-LOW_SPEED);
 	right_motor_set_speed(-LOW_SPEED);
 	chThdSleepMilliseconds(GO_BACK_TIME);
@@ -88,14 +88,16 @@ void fct_exit(){
 	current_state = SLEEP;
 
 }
-void fct_clean(){
+void fct_clean(void){
 
 }
-void fct_research(){
+void fct_research(void){
 
 }
-void fct_park(){
-
+void fct_park(void){
+	pi_regulator_start();
+	receive();
+	pi_regulator_stop();
 }
 
 
@@ -104,8 +106,6 @@ static THD_FUNCTION(MainFSM, arg) {
 
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
-
-
 
     while(1){
     	switch(current_state){
