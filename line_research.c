@@ -24,30 +24,30 @@ static THD_FUNCTION(FindLine, arg) {
 
     while(1){ //faire un bool modifié par motor_control pour dire quand il cherche la ligne
     	if (search_line){
-    		set_motor_control_active(0);
+    		set_motor_control_active(0);	//stops random movements
 
 			systime_t time_search = chVTGetSystemTime();
 
 //			motor_control_stop();
-			while(!((time_search + MS2ST(5000)) < chVTGetSystemTime())){
+			while(!((time_search + MS2ST(5000)) < chVTGetSystemTime())){ //searching a line for 5000ms
 
 				right_motor_set_speed(MOTOR_SPEED_LIMIT/4);
 				left_motor_set_speed(-MOTOR_SPEED_LIMIT/4);
 				if(return_line_detected()){
-					palTogglePad(GPIOD, GPIOD_LED1);
+					palTogglePad(GPIOD, GPIOD_LED1);	//activates LED if it finds a line
 					line_found = 1;
 					break;
 				}
 				chThdSleepUntilWindowed(time, time + MS2ST(100));
 			}
-			if(line_found){
-				right_motor_set_speed(0);
+			if(line_found){					//ligne trouvée, à remplir pour lancer le PID
+				search_line = 0;			//arrête de chercher la ligne
 				left_motor_set_speed(0);
 			}
 			else{
-				search_line = 0;
-				set_time_running(5000);
-				set_motor_control_active(1);
+				search_line = 0;				//stops searching line
+				set_time_running(5000);  		//random movements for x mx
+				set_motor_control_active(1);	//starts random movements
 			}
     	}
     	else{
