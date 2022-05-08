@@ -31,9 +31,12 @@ extern "C" {
 #define NSTEP_ONE_TURN      1000 // number of step for 1 turn of the motor
 #define WHEEL_PERIMETER     13 // [cm]
 
-
 #define LOW_SPEED				200
 #define TIME_WAIT_360_DEG		(PI*WHEEL_DISTANCE/WHEEL_PERIMETER*NSTEP_ONE_TURN/LOW_SPEED*1000)
+
+#define CLEANING_TIME			(30*1000)	//30 sec
+#define SEARCHING_ROTA_TIME		(TIME_WAIT_360_DEG + 1000)
+#define SEARCHING_MVNT_TIME		(5*1000)	//5 sec
 
 enum state {SLEEP, EXIT, CLEAN, RESEARCH_MVNT, RESEARCH_ROTA, PARK};
 
