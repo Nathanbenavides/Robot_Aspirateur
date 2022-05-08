@@ -37,10 +37,13 @@ static THD_FUNCTION(DetectProximity, arg) {
 //    		chprintf((BaseSequentialStream *)&SDU1, "\r\n");
 //    	}
 //    	chprintf((BaseSequentialStream *)&SDU1, "\r\n");
+
     	approximate_wall_angle();
+
 //    	chprintf((BaseSequentialStream *)&SDU1, "%4d", wall_angle);
 //    	palTogglePad(GPIOD, GPIOD_LED1);
-        //100Hz
+
+
     	chThdSleepMilliseconds(150);
     }
 }
@@ -54,8 +57,6 @@ void detect_proximity_start(void){
 void detect_proximity_stop(void){
 	chThdTerminate(tp);
 }
-
-
 
 void approximate_wall_angle(void){
 	bool sensor_see_wall[8];
