@@ -13,16 +13,17 @@
 
 #include <leds.h>
 
-#define KP_dist						15
-#define KI_dist						0.05	//must not be zero
+static uint16_t KP_dist = 15;
+static float KI_dist = 0.05;	//must not be zero
 
-#define KP_pos						2
-#define KI_pos 						0	//must not be zero
+static uint16_t KP_pos = 2;
+static float KI_pos = 0;	//must not be zero
 
 #define MAX_SUM_ERROR 			(MOTOR_SPEED_LIMIT)
 
 #define ERROR_MIN				0.5f
 
+#define APPROCHE_DISTANCE		50.0f
 #define MIN_DISTANCE			20.0f
 
 static thread_t *piThd;
@@ -121,7 +122,24 @@ static THD_FUNCTION(PiRegulator, arg) {
 		right_motor_set_speed(speed - speed_correction);
 		left_motor_set_speed(speed + speed_correction);
 
-		if(goal_dist > MIN_DISTANCE) goal_dist-=0.5;
+		if(goal_dist > APPROCHE_DISTANCE){
+			goal_dist-=0.5;
+
+			KP_dist = 15;
+			KI_dist = 0.05;	//must not be zero
+
+			KP_pos = 2;
+			KI_pos = 0;	//must not be zero
+		}
+		else if(goal_dist > MIN_DISTANCE){
+			goal_dist-=0.25;
+
+			KP_dist = 15;
+			KI_dist = 0.05;	//must not be zero
+
+			KP_pos = 2;
+			KI_pos = 0;	//must not be zero
+		}
 		else if(speed == 0){
 			right_motor_set_speed(0);
 			left_motor_set_speed(0);
