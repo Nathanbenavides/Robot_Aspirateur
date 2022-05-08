@@ -11,16 +11,19 @@
 #include <line_research.h>
 #include <process_image.h>
 
-static thread_t *searchThd;
+static thread_t *findLineThd;
+static uint8_t findLine_configured = 0;
+
 static bool search_line = 0;
 static bool line_found = 0;
+
+
 static THD_WORKING_AREA(waFindLine, 256);
 static THD_FUNCTION(FindLine, arg) {
 
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
     systime_t time = chVTGetSystemTime();
-
 
     while(1){ //faire un bool modifié par motor_control pour dire quand il cherche la ligne
     	if (search_line){
@@ -57,8 +60,21 @@ static THD_FUNCTION(FindLine, arg) {
 
 }
 
-void find_line_start(void){
-	searchThd = chThdCreateStatic(waFindLine, sizeof(waFindLine), NORMALPRIO, FindLine, NULL);
+void find_line_start(){
+	if(findLine_configured) return;
+
+	findLineThd = chThdCreateStatic(waFindLine, sizeof(waFindLine), NORMALPRIO, FindLine, NULL);
+	findLine_configured = 1;
+}
+
+void find_line_stop(){
+	if(findLine_configured == 0) return;
+
+	chThdTerminate(findLineThd);
+	chThdWait(findLineThd);
+	findLineThd = NULL;
+
+	findLine_configured = 0;
 }
 
 void set_search_line(bool set_search_line){

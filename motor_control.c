@@ -15,27 +15,37 @@
 #include <line_research.h>
 
 static bool motor_control_active = 1;
+
 static systime_t time_running = 10000;
 static systime_t time_start = 0;
-static thread_t *tp;
+
+static thread_t *motContThd;
+static uint8_t MotorControl_configured = 0;
+
+
 static THD_WORKING_AREA(waMotorControl, 256);
 static THD_FUNCTION(MotorControl, arg) {
 
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
     systime_t time;
+
 //    if(time_running == 0){
 //    time_running = chVTGetSystemTime();
 //    }
+
     while(1){
+    	time = chVTGetSystemTime();
+
     	if(time_start == 0){
     		time_start = chVTGetSystemTime();
-    	    }
+    	}
+
     	if(motor_control_active){
 			if((time_start + MS2ST(time_running)) < chVTGetSystemTime()){
 				set_search_line(1);
 			}
-			time = chVTGetSystemTime();
+
 			if(!return_wall_detected() || (abs(return_wall_angle()) > 90)){
 				right_motor_set_speed(MOTOR_SPEED_LIMIT/2);
 				left_motor_set_speed(MOTOR_SPEED_LIMIT/2);
@@ -78,13 +88,18 @@ static THD_FUNCTION(MotorControl, arg) {
 
 
 void motor_control_start(void){
-	tp = chThdCreateStatic(waMotorControl, sizeof(waMotorControl), NORMALPRIO, MotorControl, NULL);
+	if(MotorControl_configured) return;
+
+	motContThd = chThdCreateStatic(waMotorControl, sizeof(waMotorControl), NORMALPRIO, MotorControl, NULL);
+	MotorControl_configured = 1;
 }
 
 void motor_control_stop(void){
-    chThdTerminate(tp);
-    chThdWait(tp);
-    tp = NULL;
+    chThdTerminate(motContThd);
+    chThdWait(motContThd);
+    motContThd = NULL;
+
+    time_start = 0;
 
 }
 

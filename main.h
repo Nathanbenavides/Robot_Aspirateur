@@ -35,7 +35,7 @@ extern "C" {
 #define LOW_SPEED				200
 #define TIME_WAIT_360_DEG		(PI*WHEEL_DISTANCE/WHEEL_PERIMETER*NSTEP_ONE_TURN/LOW_SPEED*1000)
 
-enum state {SLEEP, EXIT, CLEAN, RESEARCH, PARK};
+enum state {SLEEP, EXIT, CLEAN, RESEARCH_MVNT, RESEARCH_ROTA, PARK};
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;

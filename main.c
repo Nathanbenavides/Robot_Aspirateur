@@ -91,7 +91,10 @@ void fct_exit(void){
 void fct_clean(void){
 
 }
-void fct_research(void){
+void fct_research_mvnt(void){
+
+}
+void fct_research_rota(void){
 
 }
 void fct_park(void){
@@ -112,7 +115,8 @@ static THD_FUNCTION(MainFSM, arg) {
 			case SLEEP : fct_sleep(); break;
 			case EXIT : fct_exit(); break;
 			case CLEAN : fct_clean(); break;
-			case RESEARCH : fct_research(); break;
+			case RESEARCH_MVNT : fct_research_mvnt(); break;
+			case RESEARCH_ROTA : fct_research_rota(); break;
 			case PARK : fct_park();	break;
     	}
     }
@@ -144,9 +148,8 @@ int main(void)
 
 
 
-	//stars the threads for the pi regulator and the processing of the image
-	//pi_regulator_start();
-	//process_image_start();
+	//stars the threads for the processing of the image
+	process_image_start();
 
     fsmThd = chThdCreateStatic(waMainFSM, sizeof(waMainFSM), NORMALPRIO, MainFSM, NULL);
 
