@@ -21,7 +21,6 @@ static THD_FUNCTION(DetectProximity, arg) {
 
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
-    systime_t time;
 
 
     while(1){

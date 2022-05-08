@@ -21,7 +21,6 @@ static THD_FUNCTION(FindLine, arg) {
     (void)arg;
 
     systime_t time_search = chVTGetSystemTime();
-    static bool line_found = 0;
 
     while(1){
     	right_motor_set_speed(LOW_SPEED);
