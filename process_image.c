@@ -114,7 +114,7 @@ static THD_FUNCTION(CaptureImage, arg) {
 	dcmi_set_capture_mode(CAPTURE_ONE_SHOT);
 	dcmi_prepare();
 
-    while(1){
+    while(!chThdShouldTerminateX()){
         //starts a capture
 		dcmi_capture_start();
 		//waits for the capture to be done
@@ -137,7 +137,7 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 	bool send_to_computer = true;
 
-    while(1){
+    while(!chThdShouldTerminateX()){
     	//waits until an image has been captured
         chBSemWait(&image_ready_sem);
 		//gets the pointer to the array filled with the last image in RGB565    
@@ -159,10 +159,10 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 //		chprintf((BaseSequentialStream *)&SDU1, "Width = %d Pos = %d dist = %.2f\r\n", lineWidth, line_position, distance_cm);
 
-		if(send_to_computer){
-			//sends to the computer the image
-			SendUint8ToComputer(image, IMAGE_BUFFER_SIZE);
-		}
+//		if(send_to_computer){
+//			//sends to the computer the image
+//			SendUint8ToComputer(image, IMAGE_BUFFER_SIZE);
+//		}
 		//invert the bool
 		send_to_computer = !send_to_computer;
     }

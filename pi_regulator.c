@@ -90,7 +90,7 @@ static THD_FUNCTION(PiRegulator, arg) {
 
     float goal_dist = 100;
 
-    while(1){
+    while(!chThdShouldTerminateX()){
 
     	if(PiRegulator_configured == 0){
     		PI_dist(0, 1);
@@ -154,7 +154,7 @@ static THD_FUNCTION(PiRegulator, arg) {
 
 void pi_regulator_start(void){
 
-	if(PiRegulator_configured==1) return;
+	if(PiRegulator_configured) return;
 
 	piThd = chThdCreateStatic(waPiRegulator, sizeof(waPiRegulator), NORMALPRIO, PiRegulator, NULL);
 	VL53L0X_start();

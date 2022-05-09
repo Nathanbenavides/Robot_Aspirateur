@@ -23,7 +23,7 @@ static THD_FUNCTION(DetectProximity, arg) {
     (void)arg;
 
 
-    while(1){
+    while(!chThdShouldTerminateX()){
 
     	messagebus_topic_t *prox_topic = messagebus_find_topic_blocking(&bus, "/proximity");
     	messagebus_topic_wait(prox_topic, &prox_values, sizeof(prox_values));

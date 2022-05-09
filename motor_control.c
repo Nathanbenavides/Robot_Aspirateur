@@ -25,7 +25,7 @@ static THD_FUNCTION(MotorControl, arg) {
     (void)arg;
     systime_t time;
 
-    while(1){
+    while(!chThdShouldTerminateX()){
 
     	time = chVTGetSystemTime();
 
@@ -80,6 +80,8 @@ void motor_control_stop(void){
     chThdTerminate(motContThd);
     chThdWait(motContThd);
     motContThd = NULL;
+
+    MotorControl_configured = 0;
 
     right_motor_set_speed(0);
 	left_motor_set_speed(0);

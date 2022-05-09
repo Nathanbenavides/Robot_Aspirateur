@@ -27,8 +27,6 @@
 #include <process_image.h>
 #include <line_research.h>
 
-#define GO_BACK_TIME 3000
-
 // initialisation mutex proximity sensor
 messagebus_t bus;
 MUTEX_DECL(bus_lock);
@@ -65,43 +63,48 @@ void receive(){
     thread_t *tp = chMsgWait();
     msg_t msg = chMsgGet(tp);
     current_state = msg-1;
+    chMsgRelease(tp, MSG_OK);
 }
 
 void fct_sleep(void){
 	uint8_t selector = get_selector();
+
 	set_body_led(1);
+
 	do{
 		chThdSleepMilliseconds(500);
 	}while(selector == get_selector());
+
 	set_body_led(0);
 	chThdSleepMilliseconds(1000);
 	current_state = EXIT;
 }
 
 void fct_exit(void){
+
 	left_motor_set_speed(-LOW_SPEED);
 	right_motor_set_speed(-LOW_SPEED);
+
 	chThdSleepMilliseconds(GO_BACK_TIME);
+
 	left_motor_set_speed(-LOW_SPEED);
 	right_motor_set_speed(LOW_SPEED);
+
 	chThdSleepMilliseconds(TIME_WAIT_360_DEG/2);
+
 	left_motor_set_speed(0);
 	right_motor_set_speed(0);
+
 	current_state = CLEAN;
 }
 
 void fct_clean(void){
 	systime_t time = chVTGetSystemTime();
 
-	set_led(LED1, 1);
-
 	motor_control_start();
 	chThdSleepUntilWindowed(time, time + S2ST(TIME_WAIT_CLEANING));
-	set_led(LED1, 0);
 	motor_control_stop();
 	current_state = RESEARCH_ROTA;
-
-//	set_led(LED1, 0);
 }
 
 void fct_research_mvnt(void){
@@ -110,7 +113,7 @@ void fct_research_mvnt(void){
 	set_led(LED3, 1);
 
 	motor_control_start();
-	chThdSleepUntilWindowed(time, time + MS2ST(TIME_WAIT_SEARCHING_MVNT));
+	chThdSleepUntilWindowed(time, time + S2ST(TIME_WAIT_SEARCHING_MVNT));
 	motor_control_stop();
 	current_state = RESEARCH_ROTA;
 
@@ -184,6 +187,7 @@ int main(void)
 
 	//stars the threads for the processing of the image
 	process_image_start();
+	proximity_start();
 	detect_proximity_start();
 
     fsmThd = chThdCreateStatic(waMainFSM, sizeof(waMainFSM), NORMALPRIO, MainFSM, NULL);

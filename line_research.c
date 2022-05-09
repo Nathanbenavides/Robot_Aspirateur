@@ -11,6 +11,8 @@
 #include <line_research.h>
 #include <process_image.h>
 
+#include <leds.h>
+
 static thread_t *findLineThd;
 static uint8_t findLine_configured = 0;
 
@@ -22,20 +24,27 @@ static THD_FUNCTION(FindLine, arg) {
 
     systime_t time_search = chVTGetSystemTime();
 
-    while(1){
+    while(!chThdShouldTerminateX()){
+
+    	set_body_led(1);
+
     	right_motor_set_speed(LOW_SPEED);
 		left_motor_set_speed(-LOW_SPEED);
 
-		if(return_line_detected()){
+		if(return_line_detected() && 0){
 			right_motor_set_speed(0);
 			left_motor_set_speed(0);
 			send(PARK);
+			set_body_led(0);
 		}
-		else if(chVTGetSystemTime() <= time_search + MS2ST(TIME_WAIT_SEARCHING_ROTA)){ //searching a line for TIME_WAIT_SEARCHING_ROTA
+		else if(chVTGetSystemTime() >= time_search + MS2ST(TIME_WAIT_SEARCHING_ROTA)){ //searching a line for TIME_WAIT_SEARCHING_ROTA
 			right_motor_set_speed(0);
 			left_motor_set_speed(0);
 			send(RESEARCH_MVNT);
+			set_body_led(0);
 		}
+
+		//chprintf((BaseSequentialStream *)&SDU1, "Find Line");
 
 		chThdSleepMilliseconds(100);
 
