@@ -19,6 +19,7 @@
 #include <motor_control.h>
 #include <pi_regulator.h>
 #include <process_image.h>
+#include <line_research.h>
 
 #define GO_BACK_TIME 3000
 
@@ -70,6 +71,7 @@ void fct_sleep(void){
 	chThdSleepMilliseconds(1000);
 	current_state = EXIT;
 }
+
 void fct_exit(void){
 	left_motor_set_speed(-LOW_SPEED);
 	right_motor_set_speed(-LOW_SPEED);
@@ -79,22 +81,54 @@ void fct_exit(void){
 	chThdSleepMilliseconds(TIME_WAIT_360_DEG/2);
 	left_motor_set_speed(0);
 	right_motor_set_speed(0);
-	current_state = SLEEP;
-
+	current_state = CLEAN;
 }
+
 void fct_clean(void){
+	systime_t time = chVTGetSystemTime();
 
+	set_led(LED1, 1);
+
+	motor_control_start();
+	chThdSleepUntilWindowed(time, time + S2ST(TIME_WAIT_CLEANING));
+	set_led(LED1, 0);
+	motor_control_stop();
+	current_state = RESEARCH_ROTA;
+
+//	set_led(LED1, 0);
 }
+
 void fct_research_mvnt(void){
+	systime_t time = chVTGetSystemTime();
 
+	set_led(LED3, 1);
+
+	motor_control_start();
+	chThdSleepUntilWindowed(time, time + MS2ST(TIME_WAIT_SEARCHING_MVNT));
+	motor_control_stop();
+	current_state = RESEARCH_ROTA;
+
+	set_led(LED3, 0);
 }
+
 void fct_research_rota(void){
+	set_led(LED5, 1);
 
+	find_line_start();
+	receive();
+	find_line_stop();
+
+	set_led(LED5, 0);
 }
+
 void fct_park(void){
+	set_led(LED7, 1);
+
 	pi_regulator_start();
 	receive();
 	pi_regulator_stop();
+
+	set_led(LED7, 0);
 }
 
 
@@ -141,6 +175,7 @@ int main(void)
 
 	//stars the threads for the processing of the image
 	process_image_start();
+	detect_proximity_start();
 
     fsmThd = chThdCreateStatic(waMainFSM, sizeof(waMainFSM), NORMALPRIO, MainFSM, NULL);
 

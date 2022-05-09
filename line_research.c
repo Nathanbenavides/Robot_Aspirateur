@@ -31,7 +31,7 @@ static THD_FUNCTION(FindLine, arg) {
 			left_motor_set_speed(0);
 			send(PARK);
 		}
-		else if(chVTGetSystemTime() <= time_search + MS2ST(TIME_WAIT_SEARCHING_ROTA)){ //searching a line for 5000ms
+		else if(chVTGetSystemTime() <= time_search + MS2ST(TIME_WAIT_SEARCHING_ROTA)){ //searching a line for TIME_WAIT_SEARCHING_ROTA
 			right_motor_set_speed(0);
 			left_motor_set_speed(0);
 			send(RESEARCH_MVNT);
@@ -42,14 +42,14 @@ static THD_FUNCTION(FindLine, arg) {
     }
 }
 
-void find_line_start(){
+void find_line_start(void){
 	if(findLine_configured) return;
 
 	findLineThd = chThdCreateStatic(waFindLine, sizeof(waFindLine), NORMALPRIO, FindLine, NULL);
 	findLine_configured = 1;
 }
 
-void find_line_stop(){
+void find_line_stop(void){
 	if(findLine_configured == 0) return;
 
 	chThdTerminate(findLineThd);
