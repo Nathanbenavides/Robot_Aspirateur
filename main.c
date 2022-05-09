@@ -27,6 +27,8 @@
 #include <process_image.h>
 #include <line_research.h>
 
+#include <sensors/VL53L0X/VL53L0X.h>
+
 // initialisation mutex proximity sensor
 messagebus_t bus;
 MUTEX_DECL(bus_lock);
@@ -192,10 +194,13 @@ int main(void)
 
     fsmThd = chThdCreateStatic(waMainFSM, sizeof(waMainFSM), NORMALPRIO, MainFSM, NULL);
 
+    //VL53L0X_start();
+
     /* Infinite loop. */
 
     while (1) {
-        chThdSleepMilliseconds(1000);
+    	//chprintf((BaseSequentialStream *)&SDU1, "Dist = %d\r\n",VL53L0X_get_dist_mm());
+        chThdSleepMilliseconds(200);
     }
 }
 

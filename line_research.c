@@ -26,22 +26,18 @@ static THD_FUNCTION(FindLine, arg) {
 
     while(!chThdShouldTerminateX()){
 
-    	set_body_led(1);
-
     	right_motor_set_speed(LOW_SPEED);
 		left_motor_set_speed(-LOW_SPEED);
 
-		if(return_line_detected() && 0){
+		if(return_line_detected()){
 			right_motor_set_speed(0);
 			left_motor_set_speed(0);
 			send(PARK);
-			set_body_led(0);
 		}
 		else if(chVTGetSystemTime() >= time_search + MS2ST(TIME_WAIT_SEARCHING_ROTA)){ //searching a line for TIME_WAIT_SEARCHING_ROTA
 			right_motor_set_speed(0);
 			left_motor_set_speed(0);
 			send(RESEARCH_MVNT);
-			set_body_led(0);
 		}
 
 		//chprintf((BaseSequentialStream *)&SDU1, "Find Line");
