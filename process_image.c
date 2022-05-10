@@ -24,13 +24,7 @@ uint16_t extract_line_width(uint8_t *buffer){
 
 	uint16_t i = 0, begin = 0, end = 0, width = 0;
 	uint8_t stop = 0, wrong_line = 0, line_not_found = 0;
-	uint32_t mean = 0;
-
-	//performs an average
-	for(uint16_t i = 0 ; i < IMAGE_BUFFER_SIZE ; i++){
-		mean += buffer[i];
-	}
-	mean /= IMAGE_BUFFER_SIZE;
+	uint32_t mean = 30;
 
 	do{
 		wrong_line = 0;

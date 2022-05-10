@@ -15,7 +15,7 @@ extern "C" {
 //constants for the differents parts of the project
 #define IMAGE_BUFFER_SIZE		640
 #define WIDTH_SLOPE				5
-#define MIN_LINE_WIDTH			40
+#define MIN_LINE_WIDTH			60
 
 #define PXTOCM					1545.0f //experimental value
 
@@ -33,14 +33,15 @@ extern "C" {
 
 #define LOW_SPEED				200
 #define TIME_WAIT_360_DEG		(PI*WHEEL_DISTANCE/WHEEL_PERIMETER*NSTEP_ONE_TURN/LOW_SPEED*1000)
+#define TIME_WAIT_1CM			(NSTEP_ONE_TURN/(WHEEL_PERIMETER*LOW_SPEED)*1000)
 
-#define TIME_WAIT_CLEANING			5	//sec
+#define TIME_WAIT_CLEANING			30	//sec
 #define TIME_WAIT_SEARCHING_ROTA	(TIME_WAIT_360_DEG + 1000)
-#define TIME_WAIT_SEARCHING_MVNT	2	//sec
+#define TIME_WAIT_SEARCHING_MVNT	5	//sec
 
 #define GO_BACK_TIME 3000
 
-enum state {SLEEP, EXIT, CLEAN, RESEARCH_MVNT, RESEARCH_ROTA, PARK};
+enum state {SLEEP, EXIT, CLEAN, RESEARCH_MVNT, RESEARCH_ROTA, PARK, LAST_CM};
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;
