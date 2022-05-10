@@ -136,6 +136,19 @@ void fct_park(void){
 	set_led(LED7, 0);
 }
 
+void fct_last_cm(void){
+
+	left_motor_set_speed(LOW_SPEED);
+	right_motor_set_speed(LOW_SPEED);
+
+	chThdSleepMilliseconds(TIME_WAIT_1CM*2);
+
+	left_motor_set_speed(0);
+	right_motor_set_speed(0);
+
+	current_state = SLEEP;
+}
+
 
 static THD_WORKING_AREA(waMainFSM, 256);
 static THD_FUNCTION(MainFSM, arg) {
@@ -151,6 +164,7 @@ static THD_FUNCTION(MainFSM, arg) {
 			case RESEARCH_MVNT : fct_research_mvnt(); break;
 			case RESEARCH_ROTA : fct_research_rota(); break;
 			case PARK : fct_park();	break;
+			case LAST_CM : fct_last_cm();	break;
     	}
     }
 }

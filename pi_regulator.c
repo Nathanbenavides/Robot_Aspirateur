@@ -13,18 +13,18 @@
 
 #include <leds.h>
 
-static uint16_t KP_dist = 15;
-static float KI_dist = 0.05;	//must not be zero
+#define KP_dist					15
+#define KI_dist 				0.05f	//must not be zero
 
-static uint16_t KP_pos = 2;
-static float KI_pos = 0;	//must not be zero
+#define KP_pos					2
+#define KI_pos					0.005f	//must not be zero
 
 #define MAX_SUM_ERROR 			(MOTOR_SPEED_LIMIT)
 
 #define ERROR_MIN				0.5f
 
 #define APPROCHE_DISTANCE		50.0f
-#define MIN_DISTANCE			20.0f
+#define MIN_DISTANCE			30.0f
 
 static thread_t *piThd;
 static uint8_t PiRegulator_configured = 0;
@@ -82,68 +82,47 @@ static THD_FUNCTION(PiRegulator, arg) {
 
     systime_t time;
 
-    uint16_t distance_mm = 0;
-    uint16_t line_position = 0;
+    uint16_t distance_mm = 0, line_position = 0, speed = 0, speed_correction = 0;
 
-    int16_t speed = 0;
-    int16_t speed_correction = 0;
+    chThdSleepMilliseconds(500);
 
-    float goal_dist = 100;
+    float goal_dist = VL53L0X_get_dist_mm() - TOF_OFFSET;
+    PI_dist(0, 1);
+    PI_pos(0, 1);
+
+    PiRegulator_configured = 1;
 
     while(!chThdShouldTerminateX()){
-
-    	if(PiRegulator_configured == 0){
-    		PI_dist(0, 1);
-    		PI_pos(0, 1);
-    	do{
-    		goal_dist = VL53L0X_get_dist_mm() - TOF_OFFSET;
-    		chThdSleepMilliseconds(500);
-    	}while(goal_dist <= 0);
-    		PiRegulator_configured = 1;
-    	}
-
     	time = chVTGetSystemTime();
 
     	distance_mm = VL53L0X_get_dist_mm() - TOF_OFFSET;
     	line_position = get_line_position();
 
+    	if(return_line_detected()==0 && distance_mm > APPROCHE_DISTANCE){
+    		send(RESEARCH_MVNT);
+    		break;
+    	}
+
 		//computes the speed to give to the motors
-		//distance_cm is modified by the image processing thread
 		speed = PI_dist(distance_mm - goal_dist, 0);
 		//computes a correction factor to let the robot rotate to be in front of the line
 		speed_correction = PI_pos(line_position - (IMAGE_BUFFER_SIZE/2), 0);
 
 		if(-MIN_SPEED_MOTOR < speed && speed < MIN_SPEED_MOTOR) speed = 0;
-		if(-MIN_SPEED_MOTOR < speed_correction && speed_correction < MIN_SPEED_MOTOR) speed_correction = 0;
 
-		//chprintf((BaseSequentialStream *)&SDU1, "Pos = %d dist = %d goal = %.2f\r\n", line_position, distance_mm, goal_dist);
+		//chprintf((BaseSequentialStream *)&SD3, "dist = %d goal = %.2f PiRegulator_configured = %d Speed = %d\r\n", distance_mm, goal_dist, PiRegulator_configured, speed);
 
 		//applies the speed from the PI regulator and the correction for the rotation
 		right_motor_set_speed(speed - speed_correction);
 		left_motor_set_speed(speed + speed_correction);
 
-		if(goal_dist > APPROCHE_DISTANCE){
-			goal_dist-=0.5;
-
-			KP_dist = 15;
-			KI_dist = 0.05;	//must not be zero
-
-			KP_pos = 2;
-			KI_pos = 0;	//must not be zero
+		if(goal_dist > MIN_DISTANCE){
+			goal_dist-=0.3;
 		}
-		else if(goal_dist > MIN_DISTANCE){
-			goal_dist-=0.25;
-
-			KP_dist = 15;
-			KI_dist = 0.05;	//must not be zero
-
-			KP_pos = 2;
-			KI_pos = 0;	//must not be zero
-		}
-		else if(speed == 0){
+		else if(speed == 0 && distance_mm == MIN_DISTANCE){
 			right_motor_set_speed(0);
 			left_motor_set_speed(0);
-			send(SLEEP);
+			send(LAST_CM);
 		}
 
         //100Hz
@@ -167,6 +146,9 @@ void pi_regulator_stop(void){
     piThd = NULL;
 
 	VL53L0X_stop();
+
+	right_motor_set_speed(0);
+	left_motor_set_speed(0);
 
 	PiRegulator_configured = 0;
 }
