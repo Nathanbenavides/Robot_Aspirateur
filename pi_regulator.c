@@ -23,7 +23,7 @@
 
 #define ERROR_MIN				0.5f
 
-#define APPROCHE_DISTANCE		50.0f
+#define APPROCHE_DISTANCE		70.0f
 #define MIN_DISTANCE			30.0f
 
 static thread_t *piThd;
@@ -82,7 +82,8 @@ static THD_FUNCTION(PiRegulator, arg) {
 
     systime_t time;
 
-    uint16_t distance_mm = 0, line_position = 0, speed = 0, speed_correction = 0;
+    uint16_t distance_mm = 0, line_position = 0;
+    int16_t speed = 0, speed_correction = 0;
 
     chThdSleepMilliseconds(500);
 
@@ -98,7 +99,7 @@ static THD_FUNCTION(PiRegulator, arg) {
     	distance_mm = VL53L0X_get_dist_mm() - TOF_OFFSET;
     	line_position = get_line_position();
 
-    	if(return_line_detected()==0 && distance_mm > APPROCHE_DISTANCE){
+    	if(return_line_detected()==0 && goal_dist > APPROCHE_DISTANCE){
     		send(RESEARCH_MVNT);
     		break;
     	}
@@ -122,7 +123,7 @@ static THD_FUNCTION(PiRegulator, arg) {
 		else if(speed == 0 && distance_mm == MIN_DISTANCE){
 			right_motor_set_speed(0);
 			left_motor_set_speed(0);
-			send(LAST_CM);
+			send(SLEEP);//LAST_CM);
 		}
 
         //100Hz
