@@ -166,6 +166,11 @@ float distance_value(void){
 
 }
 
+bool compare_front_prox(void){
+	if ((prox_values.delta[6] >= prox_values.delta[7]) || (prox_values.delta[1] >= prox_values.delta[0])) return true;
+	return false;
+}
+
 
 
 

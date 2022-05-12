@@ -7,5 +7,6 @@ int return_wall_angle(void);
 bool return_wall_detected(void);
 int prox_value_delta(uint8_t sensor);
 float distance_value(void);
+bool compare_front_prox(void);
 
 #endif /* DETECT_PROXIMITY_H */
