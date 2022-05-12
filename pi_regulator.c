@@ -15,17 +15,17 @@
 
 
 #define KP_dist					15
-#define KI_dist 				0.05f	//must not be zero
+#define KI_dist 				0.03f	//must not be zero
 
 #define KP_pos					2
 #define KI_pos					0.005f	//must not be zero
 
-#define MAX_SUM_ERROR 			(MOTOR_SPEED_LIMIT)
+#define MAX_SUM_ERROR 			(MOTOR_SPEED_LIMIT*0.8)
 
-#define ERROR_MIN				0.5f
+#define ERROR_MIN				4
 
-#define APPROCHE_DISTANCE		70.0f
-#define MIN_DISTANCE			30.0f
+#define APPROCHE_DISTANCE		60.0f
+#define MIN_DISTANCE			10.0f
 
 static thread_t *piThd;
 static uint8_t PiRegulator_configured = 0;
@@ -75,7 +75,7 @@ int16_t PI_pos(float e, uint8_t init){
 	return (y < 150 && -150 < y)? 0 : y;
 }
 
-static THD_WORKING_AREA(waPiRegulator, 256);
+static THD_WORKING_AREA(waPiRegulator, 512);
 static THD_FUNCTION(PiRegulator, arg) {
 
     chRegSetThreadName(__FUNCTION__);
@@ -100,7 +100,7 @@ static THD_FUNCTION(PiRegulator, arg) {
     	distance_mm = distance_value();
     	line_position = get_line_position();
 
-    	if(return_line_detected()==0 && goal_dist > APPROCHE_DISTANCE){
+    	if((return_line_detected()==0 && goal_dist > APPROCHE_DISTANCE) || compare_front_prox()){
     		send(RESEARCH_MVNT);
     		break;
     	}
@@ -112,6 +112,10 @@ static THD_FUNCTION(PiRegulator, arg) {
 
 		if(-MIN_SPEED_MOTOR < speed && speed < MIN_SPEED_MOTOR) speed = 0;
 
+		if(distance_mm < APPROCHE_DISTANCE){
+			speed_correction = 0;
+		}
+
 		//chprintf((BaseSequentialStream *)&SD3, "dist = %d goal = %.2f PiRegulator_configured = %d Speed = %d\r\n", distance_mm, goal_dist, PiRegulator_configured, speed);
 
 		//applies the speed from the PI regulator and the correction for the rotation
@@ -121,7 +125,7 @@ static THD_FUNCTION(PiRegulator, arg) {
 		if(goal_dist > MIN_DISTANCE){
 			goal_dist-=0.3;
 		}
-		else if(speed == 0 && distance_mm == MIN_DISTANCE){
+		else if(speed == 0 && abs(distance_mm - MIN_DISTANCE) < ERROR_MIN){
 			right_motor_set_speed(0);
 			left_motor_set_speed(0);
 			send(SLEEP);//LAST_CM);

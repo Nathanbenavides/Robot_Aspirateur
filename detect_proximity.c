@@ -51,8 +51,9 @@ static THD_FUNCTION(DetectProximity, arg) {
 
 
 void detect_proximity_start(void){
-	tp = chThdCreateStatic(waDetectProximity, sizeof(waDetectProximity), NORMALPRIO+1, DetectProximity, NULL);
 	VL53L0X_start();
+	tp = chThdCreateStatic(waDetectProximity, sizeof(waDetectProximity), NORMALPRIO+1, DetectProximity, NULL);
+
 }
 
 void detect_proximity_stop(void){
@@ -140,7 +141,7 @@ int prox_value_delta(uint8_t sensor){
 }
 
 float proximity_dist_black(unsigned int value){			//non linear relation between sensor values and distance
-	if(value >= 420){
+	if(value >= PROX_THRESHOLD){
 		return PROX_SLOP_BIG * value + PROX_OFFSET_BIG;	//approximation for close distances
 	}
 	return PROX_SLOP_SMALL * value + PROX_OFFSET_SMALL;	//approximation for far distances
@@ -160,14 +161,15 @@ float distance_value(void){
 	if(dist_tof < 35){
 		return return_dist_prox();
 	}
-	else{
-		return dist_tof;
-	}
+	return dist_tof;
 
 }
 
 bool compare_front_prox(void){
-	if ((prox_values.delta[6] >= prox_values.delta[7]) || (prox_values.delta[1] >= prox_values.delta[0])) return true;
+	if((prox_values.delta[6] > PROX_THRESHOLD && prox_values.delta[7] > PROX_THRESHOLD)
+			|| (prox_values.delta[0] > PROX_THRESHOLD && prox_values.delta[1] > PROX_THRESHOLD)){
+		if((prox_values.delta[6] >= prox_values.delta[7]) || (prox_values.delta[1] >= prox_values.delta[0])) return true;
+	}
 	return false;
 }
 

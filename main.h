@@ -26,16 +26,16 @@ extern "C" {
 
 //TOF Value
 #define TOF_SLOP				0.8733f
-#define TOF_OFFSET			(-4.0459f)
-#define TOF_SMALL_DIST				35
-#define TOF_CORRECTION(value)			(TOF_SLOP*value+TOF_OFFSET)
+#define TOF_OFFSET				(-4.0459f)
+#define TOF_SMALL_DIST			35
+#define TOF_CORRECTION(value)	(TOF_SLOP*value+TOF_OFFSET)
 
 //Proximity Value
 #define PROX_SLOP_BIG				(-0.0041f)
 #define PROX_OFFSET_BIG				(14.487f)
 #define PROX_SLOP_SMALL				(-0.067f)
 #define PROX_OFFSET_SMALL			(40.54f)
-
+#define PROX_THRESHOLD				420
 
 
 #define PI                  	3.1415926536f
@@ -48,7 +48,7 @@ extern "C" {
 
 #define TIME_WAIT_CLEANING			30	//sec
 #define TIME_WAIT_SEARCHING_ROTA	(TIME_WAIT_360_DEG + 1000)
-#define TIME_WAIT_SEARCHING_MVNT	5	//sec
+#define TIME_WAIT_SEARCHING_MVNT	3	//sec
 
 #define GO_BACK_TIME 			3000
 
