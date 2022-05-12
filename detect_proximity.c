@@ -29,16 +29,14 @@ static THD_FUNCTION(DetectProximity, arg) {
     	messagebus_topic_wait(prox_topic, &prox_values, sizeof(prox_values));
 
     	// Sensors info print: each line contains data related to a single sensor.
-//    	for (uint8_t i = 0; i < sizeof(prox_values.ambient)/sizeof(prox_values.ambient[0]); i++) {
+    	for (uint8_t i = 0; i < sizeof(prox_values.ambient)/sizeof(prox_values.ambient[0]); i++) {
 //    		chprintf((BaseSequentialStream *)&SDU1, "%4d,", prox_values.ambient[i]);
 //    		chprintf((BaseSequentialStream *)&SDU1, "%4d,", prox_values.reflected[i]);
-//    		chprintf((BaseSequentialStream *)&SDU1, "%4d", prox_values.delta[i]);
+    		chprintf((BaseSequentialStream *)&SDU1, "capt[%d] = %4d   ", i, prox_values.delta[i]);
 //    		chprintf((BaseSequentialStream *)&SDU1, "\r\n");
-//    	}
-//    	chprintf((BaseSequentialStream *)&SDU1, "\r\n");
-    	chprintf((BaseSequentialStream *)&SDU1, "%4d", prox_values.delta[0]);
-    	chprintf((BaseSequentialStream *)&SDU1, "%4d", prox_values.delta[7]);
+    	}
     	chprintf((BaseSequentialStream *)&SDU1, "\r\n");
+
     	approximate_wall_angle();
 
 //    	chprintf((BaseSequentialStream *)&SDU1, "%4d", wall_angle);
