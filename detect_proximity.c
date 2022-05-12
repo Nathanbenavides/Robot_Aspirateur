@@ -36,7 +36,9 @@ static THD_FUNCTION(DetectProximity, arg) {
 //    		chprintf((BaseSequentialStream *)&SDU1, "\r\n");
 //    	}
 //    	chprintf((BaseSequentialStream *)&SDU1, "\r\n");
-
+    	chprintf((BaseSequentialStream *)&SDU1, "%4d", prox_values.delta[0]);
+    	chprintf((BaseSequentialStream *)&SDU1, "%4d", prox_values.delta[7]);
+    	chprintf((BaseSequentialStream *)&SDU1, "\r\n");
     	approximate_wall_angle();
 
 //    	chprintf((BaseSequentialStream *)&SDU1, "%4d", wall_angle);
