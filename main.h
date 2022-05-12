@@ -22,24 +22,31 @@ extern "C" {
 #define GOAL_DISTANCE 			10.0f
 #define MIN_SPEED_MOTOR			150
 
-#define TOF_OFFSET				20
+#define TOF_SLOP_BIG				0.8733f
+#define TOF_OFFSET_BIG				(-4.0459f)
+#define TOF_SLOP_SMALL				0.0408f
+#define TOF_OFFSET_SMALL			(-1.2061f)
+#define TOF_SMALL_DIST				30
+#define TOF_CORRECTION(a)			(a>=TOF_SMALL_DIST?(TOF_SLOP_BIG*a+TOF_OFFSET_BIG):(TOF_SLOP_SMALL*a*a+TOF_OFFSET_SMALL*a))
 
-#define PI                  3.1415926536f
-#define WHEEL_DISTANCE      5.35f    //cm
-#define NSTEP_ONE_TURN      1000 // number of step for 1 turn of the motor
-#define WHEEL_PERIMETER     13 // [cm]
+
+#define PI                  	3.1415926536f
+#define WHEEL_DISTANCE			5.35f    //cm
+#define NSTEP_ONE_TURN			1000 // number of step for 1 turn of the motor
+#define WHEEL_PERIMETER			13 // [cm]
 
 #define LOW_SPEED				200
 #define TIME_WAIT_360_DEG		(PI*WHEEL_DISTANCE/WHEEL_PERIMETER*NSTEP_ONE_TURN/LOW_SPEED*1000)
-#define TIME_WAIT_1CM			(NSTEP_ONE_TURN/(WHEEL_PERIMETER*LOW_SPEED)*1000)
 
 #define TIME_WAIT_CLEANING			30	//sec
 #define TIME_WAIT_SEARCHING_ROTA	(TIME_WAIT_360_DEG + 1000)
 #define TIME_WAIT_SEARCHING_MVNT	5	//sec
 
-#define GO_BACK_TIME 3000
+#define GO_BACK_TIME 			3000
 
-enum state {SLEEP, EXIT, CLEAN, RESEARCH_MVNT, RESEARCH_ROTA, PARK, LAST_CM};
+
+
+enum state {SLEEP, EXIT, CLEAN, RESEARCH_MVNT, RESEARCH_ROTA, PARK};
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;
