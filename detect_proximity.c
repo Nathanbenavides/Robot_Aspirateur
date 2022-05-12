@@ -30,13 +30,13 @@ static THD_FUNCTION(DetectProximity, arg) {
     	messagebus_topic_wait(prox_topic, &prox_values, sizeof(prox_values));
 
     	// Sensors info print: each line contains data related to a single sensor.
-    	for (uint8_t i = 0; i < sizeof(prox_values.ambient)/sizeof(prox_values.ambient[0]); i++) {
+//    	for (uint8_t i = 0; i < sizeof(prox_values.ambient)/sizeof(prox_values.ambient[0]); i++) {
 //    		chprintf((BaseSequentialStream *)&SDU1, "%4d,", prox_values.ambient[i]);
 //    		chprintf((BaseSequentialStream *)&SDU1, "%4d,", prox_values.reflected[i]);
-    		chprintf((BaseSequentialStream *)&SDU1, "capt[%d] = %4d   ", i, prox_values.delta[i]);
+//    		chprintf((BaseSequentialStream *)&SDU1, "capt[%d] = %4d   ", i, prox_values.delta[i]);
 //    		chprintf((BaseSequentialStream *)&SDU1, "\r\n");
-    	}
-    	chprintf((BaseSequentialStream *)&SDU1, "\r\n");
+//    	}
+//    	chprintf((BaseSequentialStream *)&SDU1, "\r\n");
 
     	approximate_wall_angle();
 
@@ -52,6 +52,7 @@ static THD_FUNCTION(DetectProximity, arg) {
 
 void detect_proximity_start(void){
 	tp = chThdCreateStatic(waDetectProximity, sizeof(waDetectProximity), NORMALPRIO+1, DetectProximity, NULL);
+	VL53L0X_start();
 }
 
 void detect_proximity_stop(void){
@@ -120,7 +121,6 @@ void approximate_wall_angle(void){
 		case 7:
 			wall_angle = 10;	//front left 1
 			return;
-
 	}
 
 	return;
@@ -136,20 +136,22 @@ bool return_wall_detected(void){
 }
 
 int prox_value_delta(uint8_t sensor){
-return prox_values.delta[sensor];
+	return prox_values.delta[sensor];
+}
+
+float proximity_dist_black(unsigned int value){			//non linear relation between sensor values and distance
+	if(value >= 420){
+		return PROX_SLOP_BIG * value + PROX_OFFSET_BIG;	//approximation for close distances
+	}
+	return PROX_SLOP_SMALL * value + PROX_OFFSET_SMALL;	//approximation for far distances
 }
 
 float return_dist_prox(void){													//non linear relation between sensor values and distance
-	if ((prox_values.delta[0] > 420) || (prox_values.delta[7] > 420)){			//approximation for far distances
-		float dist_close_proximity_1 = -0.0041 * prox_values.delta[0] + 14.487 ;
-		float dist_close_proximity_8 = -0.0041 * prox_values.delta[7] + 14.487 ;
-		return (dist_close_proximity_1 + dist_close_proximity_8) / 2;
-	}
-	else{																		//approximation for close distances
-		float dist_far_proximity_1 = -0.067 * prox_values.delta[0] + 40.54 ;
-		float dist_far_proximity_8 = -0.067 * prox_values.delta[7] + 40.54 ;
-		return (dist_far_proximity_1 + dist_far_proximity_8) / 2;
-	}
+	float dist_proximity1 = proximity_dist_black(prox_values.delta[0]);
+	float dist_proximity8 = proximity_dist_black(prox_values.delta[7]);
+
+	if(dist_proximity1 < dist_proximity8) return dist_proximity1;
+	return dist_proximity8;
 }
 
 float distance_value(void){

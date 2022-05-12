@@ -192,7 +192,7 @@ int main(void)
 	proximity_start();
 	detect_proximity_start();
 
-    //fsmThd = chThdCreateStatic(waMainFSM, sizeof(waMainFSM), NORMALPRIO, MainFSM, NULL);
+    fsmThd = chThdCreateStatic(waMainFSM, sizeof(waMainFSM), NORMALPRIO, MainFSM, NULL);
 
 //    VL53L0X_start();
 

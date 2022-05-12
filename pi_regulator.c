@@ -7,11 +7,12 @@
 
 #include <main.h>
 #include <motors.h>
-#include <sensors/VL53L0X/VL53L0X.h>
+//#include <sensors/VL53L0X/VL53L0X.h>
+
 #include <pi_regulator.h>
 #include <process_image.h>
+#include <detect_proximity.h>
 
-#include <leds.h>
 
 #define KP_dist					15
 #define KI_dist 				0.05f	//must not be zero
@@ -87,7 +88,7 @@ static THD_FUNCTION(PiRegulator, arg) {
 
     chThdSleepMilliseconds(500);
 
-    float goal_dist = TOF_CORRECTION(VL53L0X_get_dist_mm());
+    float goal_dist = distance_value();
     PI_dist(0, 1);
     PI_pos(0, 1);
 
@@ -96,7 +97,7 @@ static THD_FUNCTION(PiRegulator, arg) {
     while(!chThdShouldTerminateX()){
     	time = chVTGetSystemTime();
 
-    	distance_mm = TOF_CORRECTION(VL53L0X_get_dist_mm());
+    	distance_mm = distance_value();
     	line_position = get_line_position();
 
     	if(return_line_detected()==0 && goal_dist > APPROCHE_DISTANCE){
@@ -137,7 +138,7 @@ void pi_regulator_start(void){
 	if(PiRegulator_configured) return;
 
 	piThd = chThdCreateStatic(waPiRegulator, sizeof(waPiRegulator), NORMALPRIO, PiRegulator, NULL);
-	VL53L0X_start();
+	//VL53L0X_start();
 }
 
 
@@ -146,7 +147,7 @@ void pi_regulator_stop(void){
     chThdWait(piThd);
     piThd = NULL;
 
-	VL53L0X_stop();
+	//VL53L0X_stop();
 
 	right_motor_set_speed(0);
 	left_motor_set_speed(0);
