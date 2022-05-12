@@ -192,14 +192,14 @@ int main(void)
 	proximity_start();
 	detect_proximity_start();
 
-    fsmThd = chThdCreateStatic(waMainFSM, sizeof(waMainFSM), NORMALPRIO, MainFSM, NULL);
+    //fsmThd = chThdCreateStatic(waMainFSM, sizeof(waMainFSM), NORMALPRIO, MainFSM, NULL);
 
-    //VL53L0X_start();
+//    VL53L0X_start();
 
     /* Infinite loop. */
 
     while (1) {
-    	//chprintf((BaseSequentialStream *)&SDU1, "Dist = %d\r\n",VL53L0X_get_dist_mm());
+//    	chprintf((BaseSequentialStream *)&SDU1, "Dist = %.2f\r\n",TOF_CORRECTION(VL53L0X_get_dist_mm()));
         chThdSleepMilliseconds(200);
     }
 }
