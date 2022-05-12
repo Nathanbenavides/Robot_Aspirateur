@@ -180,7 +180,7 @@ int main(void)
     dcmi_start();
 	po8030_start();
 	//inits the motors
-	motors_init();
+	//motors_init();
 
     //proximity_start();
     messagebus_init(&bus, &bus_lock, &bus_condvar);
