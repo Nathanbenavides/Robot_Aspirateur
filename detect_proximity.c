@@ -7,6 +7,7 @@
 #include <main.h>
 #include <sensors/proximity.h>
 #include <detect_proximity.h>
+#include <sensors/VL53L0X/VL53L0X.h>
 
 static thread_t *tp;
 static proximity_msg_t prox_values;
@@ -139,5 +140,32 @@ bool return_wall_detected(void){
 int prox_value_delta(uint8_t sensor){
 return prox_values.delta[sensor];
 }
+
+float return_dist_prox(void){													//non linear relation between sensor values and distance
+	if ((prox_values.delta[0] > 420) || (prox_values.delta[7] > 420)){			//approximation for far distances
+		float dist_close_proximity_1 = -0.0041 * prox_values.delta[0] + 14.487 ;
+		float dist_close_proximity_8 = -0.0041 * prox_values.delta[7] + 14.487 ;
+		return (dist_close_proximity_1 + dist_close_proximity_8) / 2;
+	}
+	else{																		//approximation for close distances
+		float dist_far_proximity_1 = -0.067 * prox_values.delta[0] + 40.54 ;
+		float dist_far_proximity_8 = -0.067 * prox_values.delta[7] + 40.54 ;
+		return (dist_far_proximity_1 + dist_far_proximity_8) / 2;
+	}
+}
+
+float distance_value(void){
+	float dist_tof = TOF_CORRECTION(VL53L0X_get_dist_mm());
+
+	if(dist_tof < 35){
+		return return_dist_prox();
+	}
+	else{
+		return dist_tof;
+	}
+
+}
+
+
 
 
