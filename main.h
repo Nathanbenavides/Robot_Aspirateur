@@ -22,12 +22,18 @@ extern "C" {
 #define GOAL_DISTANCE 			10.0f
 #define MIN_SPEED_MOTOR			150
 
-#define TOF_SLOP_BIG				0.8733f
-#define TOF_OFFSET_BIG				(-4.0459f)
-#define TOF_SLOP_SMALL				0.0408f
-#define TOF_OFFSET_SMALL			(-1.2061f)
-#define TOF_SMALL_DIST				30
-#define TOF_CORRECTION(a)			(a>=TOF_SMALL_DIST?(TOF_SLOP_BIG*a+TOF_OFFSET_BIG):(TOF_SLOP_SMALL*a*a+TOF_OFFSET_SMALL*a))
+//TOF Value
+#define TOF_SLOP				0.8733f
+#define TOF_OFFSET			(-4.0459f)
+#define TOF_SMALL_DIST				35
+#define TOF_CORRECTION(value)			(TOF_SLOP*value+TOF_OFFSET)
+
+//Proximity Value
+#define PROX_SLOP_BIG				(-0.0041f)
+#define PROX_OFFSET_BIG				(14.487f)
+#define PROX_SLOP_SMALL				(-0.067f)
+#define PROX_OFFSET_SMALL			(40.54f)
+
 
 
 #define PI                  	3.1415926536f
