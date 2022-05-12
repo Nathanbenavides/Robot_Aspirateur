@@ -87,7 +87,7 @@ static THD_FUNCTION(PiRegulator, arg) {
 
     chThdSleepMilliseconds(500);
 
-    float goal_dist = VL53L0X_get_dist_mm() - TOF_OFFSET;
+    float goal_dist = TOF_CORRECTION(VL53L0X_get_dist_mm());
     PI_dist(0, 1);
     PI_pos(0, 1);
 
@@ -96,7 +96,7 @@ static THD_FUNCTION(PiRegulator, arg) {
     while(!chThdShouldTerminateX()){
     	time = chVTGetSystemTime();
 
-    	distance_mm = VL53L0X_get_dist_mm() - TOF_OFFSET;
+    	distance_mm = TOF_CORRECTION(VL53L0X_get_dist_mm());
     	line_position = get_line_position();
 
     	if(return_line_detected()==0 && goal_dist > APPROCHE_DISTANCE){
