@@ -78,6 +78,7 @@ void fct_sleep(void){
 
 void fct_exit(void){
 
+//	set_led(LED1, 1);
 	left_motor_set_speed(-LOW_SPEED);
 	right_motor_set_speed(-LOW_SPEED);
 
@@ -92,6 +93,7 @@ void fct_exit(void){
 	right_motor_set_speed(0);
 
 	current_state = CLEAN;
+//	set_led(LED1, 0);
 }
 
 void fct_clean(void){
@@ -106,38 +108,38 @@ void fct_clean(void){
 void fct_research_mvnt(void){
 	systime_t time = chVTGetSystemTime();
 
-	set_led(LED3, 1);
+//	set_led(LED3, 1);
 
 	motor_control_start();
 	chThdSleepUntilWindowed(time, time + S2ST(TIME_WAIT_SEARCHING_MVNT));
 	motor_control_stop();
 	current_state = RESEARCH_ROTA;
 
-	set_led(LED3, 0);
+//	set_led(LED3, 0);
 }
 
 void fct_research_rota(void){
-	set_led(LED5, 1);
+//	set_led(LED5, 1);
 
 	find_line_start();
 	receive();
 	find_line_stop();
 
-	set_led(LED5, 0);
+//	set_led(LED5, 0);
 }
 
 void fct_park(void){
-	set_led(LED7, 1);
+//	set_led(LED7, 1);
 
 	pi_regulator_start();
 	receive();
 	pi_regulator_stop();
 
-	set_led(LED7, 0);
+//	set_led(LED7, 0);
 }
 
 
-static THD_WORKING_AREA(waMainFSM, 256);
+static THD_WORKING_AREA(waMainFSM, 512);
 static THD_FUNCTION(MainFSM, arg) {
 
     chRegSetThreadName(__FUNCTION__);
@@ -171,7 +173,7 @@ int main(void)
     dcmi_start();
 	po8030_start();
 	//inits the motors
-	//motors_init();
+	motors_init();
 
     //proximity_start();
     messagebus_init(&bus, &bus_lock, &bus_condvar);
@@ -190,7 +192,7 @@ int main(void)
     /* Infinite loop. */
 
     while (1) {
-//    	chprintf((BaseSequentialStream *)&SDU1, "Dist = %.2f\r\n",TOF_CORRECTION(VL53L0X_get_dist_mm()));
+//    	chprintf((BaseSequentialStream *)&SDU1, "Dist = %.2f\r\n", distance_value());
         chThdSleepMilliseconds(200);
     }
 }
