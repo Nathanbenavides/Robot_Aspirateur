@@ -24,7 +24,6 @@ uint16_t extract_line_width(uint8_t *buffer){
 
 	uint16_t i = 0, begin = 0, end = 0, width = 0;
 	uint8_t stop = 0, wrong_line = 0, line_not_found = 0;
-	uint32_t mean = 30;
 
 	do{
 		wrong_line = 0;
@@ -32,8 +31,8 @@ uint16_t extract_line_width(uint8_t *buffer){
 		while(stop == 0 && i < (IMAGE_BUFFER_SIZE - WIDTH_SLOPE))
 		{ 
 			//the slope must at least be WIDTH_SLOPE wide and is compared
-		    //to the mean of the image
-		    if(buffer[i] > mean && buffer[i+WIDTH_SLOPE] < mean)
+		    //to the BLACK_THRESHOLD of the image
+		    if(buffer[i] > BLACK_THRESHOLD && buffer[i+WIDTH_SLOPE] < BLACK_THRESHOLD)
 		    {
 		        begin = i;
 		        stop = 1;
@@ -47,7 +46,7 @@ uint16_t extract_line_width(uint8_t *buffer){
 		    
 		    while(stop == 0 && i < IMAGE_BUFFER_SIZE)
 		    {
-		        if(buffer[i] > mean && buffer[i-WIDTH_SLOPE] < mean)
+		        if(buffer[i] > BLACK_THRESHOLD && buffer[i-WIDTH_SLOPE] < BLACK_THRESHOLD)
 		        {
 		            end = i;
 		            stop = 1;
@@ -103,7 +102,7 @@ static THD_FUNCTION(CaptureImage, arg) {
     (void)arg;
 
 	//Takes pixels 0 to IMAGE_BUFFER_SIZE of the line 10 + 11 (minimum 2 lines because reasons)
-	po8030_advanced_config(FORMAT_RGB565, 0, 200, IMAGE_BUFFER_SIZE, 2, SUBSAMPLING_X1, SUBSAMPLING_X1);
+	po8030_advanced_config(FORMAT_RGB565, 0, LINE_NUMBER, IMAGE_BUFFER_SIZE, NUMBER_OF_LINE, SUBSAMPLING_X1, SUBSAMPLING_X1);
 	dcmi_enable_double_buffering();
 	dcmi_set_capture_mode(CAPTURE_ONE_SHOT);
 	dcmi_prepare();
@@ -129,8 +128,6 @@ static THD_FUNCTION(ProcessImage, arg) {
 	uint8_t image[IMAGE_BUFFER_SIZE] = {0};
 	uint16_t lineWidth = 0;
 
-	bool send_to_computer = true;
-
     while(!chThdShouldTerminateX()){
     	//waits until an image has been captured
         chBSemWait(&image_ready_sem);
@@ -150,15 +147,6 @@ static THD_FUNCTION(ProcessImage, arg) {
 		//converts the width into a distance between the robot and the camera
 		if(lineWidth) distance_cm = PXTOCM/lineWidth;
 		else distance_cm = 0;
-
-//		chprintf((BaseSequentialStream *)&SDU1, "Width = %d Pos = %d dist = %.2f\r\n", lineWidth, line_position, distance_cm);
-
-//		if(send_to_computer){
-//			//sends to the computer the image
-//			SendUint8ToComputer(image, IMAGE_BUFFER_SIZE);
-//		}
-		//invert the bool
-		send_to_computer = !send_to_computer;
     }
 }
 
