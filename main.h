@@ -41,8 +41,23 @@ extern "C" {
 #define TOF_CORRECTION(value)			(TOF_SLOP*value+TOF_OFFSET)
 
 /****   Constants line_reasearch   ****/
-#define LINE_RESEARCH_WAIT_TIME			100
-#define TIME_WAIT_SEARCHING_ROTA	(TIME_WAIT_360_DEG + 1000)
+#define LINE_RESEARCH_WAIT_TIME			100		//ms
+#define TIME_WAIT_SEARCHING_ROTA		(TIME_WAIT_360_DEG + 1000)	//ms
+
+/**** Constants main ****/
+#define MAIN_WAIT_TIME					1000	//ms
+#define MESSAGE_FSM_SHIFT				1		//ms
+//fsm state
+enum state {SLEEP, EXIT, CLEAN, RESEARCH_MVNT, RESEARCH_ROTA, PARK};
+//sleep
+#define SLEEP_WAIT_TIME					500		//ms
+#define START_WAIT_TIME					1000	//ms
+//exit
+#define GO_BACK_TIME 			3000
+//clean
+#define TIME_WAIT_CLEANING			30	//sec
+//research_mvnt
+#define TIME_WAIT_SEARCHING_MVNT	3	//sec
 
 
 #define IMAGE_BUFFER_SIZE		640
@@ -69,22 +84,20 @@ extern "C" {
 #define LOW_SPEED				200
 #define TIME_WAIT_360_DEG		(PI*WHEEL_DISTANCE/WHEEL_PERIMETER*NSTEP_ONE_TURN/LOW_SPEED*1000)
 
-#define TIME_WAIT_CLEANING			30	//sec
-
-#define TIME_WAIT_SEARCHING_MVNT	3	//sec
-
-#define GO_BACK_TIME 			3000
 
 
 
-enum state {SLEEP, EXIT, CLEAN, RESEARCH_MVNT, RESEARCH_ROTA, PARK};
+
+
+
+
+
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;
 
 extern parameter_namespace_t parameter_root;
 
-void SendUint8ToComputer(uint8_t* data, uint16_t size);
 void send(enum state etat);
 void receive(void);
 
