@@ -27,8 +27,6 @@
 #include <process_image.h>
 #include <line_research.h>
 
-#include <sensors/VL53L0X/VL53L0X.h>
-
 // initialisation mutex proximity sensor
 messagebus_t bus;
 MUTEX_DECL(bus_lock);

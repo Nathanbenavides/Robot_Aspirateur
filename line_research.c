@@ -4,12 +4,13 @@
 #include <usbcfg.h>
 #include <chprintf.h>
 
-
 #include <main.h>
 #include <motors.h>
-#include <motor_control.h>
+
 #include <line_research.h>
+#include <motor_control.h>
 #include <process_image.h>
+
 
 static thread_t *findLineThd;
 static uint8_t findLine_configured = 0;
