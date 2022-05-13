@@ -11,8 +11,6 @@
 #include <line_research.h>
 #include <process_image.h>
 
-#include <leds.h>
-
 static thread_t *findLineThd;
 static uint8_t findLine_configured = 0;
 

@@ -32,13 +32,6 @@ CONDVAR_DECL(bus_condvar);
 static thread_t *fsmThd;
 static enum state current_state = SLEEP;
 
-void SendUint8ToComputer(uint8_t* data, uint16_t size) 
-{
-	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)"START", 5);
-	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)&size, sizeof(uint16_t));
-	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)data, size);
-}
-
 static void serial_start(void)
 {
 	static SerialConfig ser_cfg = {
@@ -51,34 +44,35 @@ static void serial_start(void)
 	sdStart(&SD3, &ser_cfg); // UART3.
 }
 
+//to send message from the thread to the FSM
 void send(enum state etat){
-	(void)chMsgSend(fsmThd, (msg_t)(etat+1));
+	(void)chMsgSend(fsmThd, (msg_t)(etat+MESSAGE_FSM_SHIFT));
 }
 
+//wait on the FSM to have message from the threat
 void receive(){
     thread_t *tp = chMsgWait();
     msg_t msg = chMsgGet(tp);
-    current_state = msg-1;
+    current_state = msg-MESSAGE_FSM_SHIFT;
     chMsgRelease(tp, MSG_OK);
 }
 
+//sub function of the FSM
 void fct_sleep(void){
 	uint8_t selector = get_selector();
 
 	set_body_led(1);
 
 	do{
-		chThdSleepMilliseconds(500);
+		chThdSleepMilliseconds(SLEEP_WAIT_TIME);
 	}while(selector == get_selector());
 
 	set_body_led(0);
-	chThdSleepMilliseconds(1000);
+	chThdSleepMilliseconds(START_WAIT_TIME);
 	current_state = EXIT;
 }
 
 void fct_exit(void){
-
-//	set_led(LED1, 1);
 	left_motor_set_speed(-LOW_SPEED);
 	right_motor_set_speed(-LOW_SPEED);
 
@@ -93,7 +87,6 @@ void fct_exit(void){
 	right_motor_set_speed(0);
 
 	current_state = CLEAN;
-//	set_led(LED1, 0);
 }
 
 void fct_clean(void){
@@ -108,37 +101,26 @@ void fct_clean(void){
 void fct_research_mvnt(void){
 	systime_t time = chVTGetSystemTime();
 
-//	set_led(LED3, 1);
-
 	motor_control_start();
 	chThdSleepUntilWindowed(time, time + S2ST(TIME_WAIT_SEARCHING_MVNT));
 	motor_control_stop();
 	current_state = RESEARCH_ROTA;
-
-//	set_led(LED3, 0);
 }
 
 void fct_research_rota(void){
-//	set_led(LED5, 1);
-
 	find_line_start();
 	receive();
 	find_line_stop();
-
-//	set_led(LED5, 0);
 }
 
 void fct_park(void){
-//	set_led(LED7, 1);
-
 	pi_regulator_start();
 	receive();
 	pi_regulator_stop();
-
-//	set_led(LED7, 0);
 }
 
 
+//threat of the FSM
 static THD_WORKING_AREA(waMainFSM, 512);
 static THD_FUNCTION(MainFSM, arg) {
 
@@ -178,22 +160,17 @@ int main(void)
     //proximity_start();
     messagebus_init(&bus, &bus_lock, &bus_condvar);
 
-
-
 	//stars the threads for the processing of the image
 	process_image_start();
 	proximity_start();
 	detect_proximity_start();
 
+	//start of the FSM
     fsmThd = chThdCreateStatic(waMainFSM, sizeof(waMainFSM), NORMALPRIO, MainFSM, NULL);
 
-//    VL53L0X_start();
-
-    /* Infinite loop. */
-
+    /* Infinite loop. Where we do nothing*/
     while (1) {
-//    	chprintf((BaseSequentialStream *)&SDU1, "Dist = %.2f\r\n", distance_value());
-        chThdSleepMilliseconds(200);
+        chThdSleepMilliseconds(MAIN_WAIT_TIME);
     }
 }
 
