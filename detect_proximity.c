@@ -7,6 +7,7 @@
 #include <main.h>
 #include <sensors/proximity.h>
 #include <sensors/VL53L0X/VL53L0X.h>
+
 #include <detect_proximity.h>
 
 static thread_t *tp;

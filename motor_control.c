@@ -7,11 +7,9 @@
 
 #include <main.h>
 #include <motors.h>
-#include <sensors/proximity.h>
 
 #include <detect_proximity.h>
 #include <motor_control.h>
-#include <motors.h>
 
 
 static thread_t *motContThd;
