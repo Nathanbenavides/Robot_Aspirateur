@@ -62,6 +62,14 @@ enum state {SLEEP, EXIT, CLEAN, RESEARCH_MVNT, RESEARCH_ROTA, PARK};
 #define TIME_WAIT_SEARCHING_MVNT		3		//sec
 
 
+/****						Constants motor_control							****/
+#define MOTOR_CONTROL_ROTA_WAIT_TIME	500
+#define MOTOR_CONTROL_WAIT_TIME			20
+#define MOTOR_SPEED						(MOTOR_SPEED_LIMIT/2)
+#define ANGLE_BEHIND					90		//deg
+#define ANGLE_IN_FRONT					10		//deg
+#define PROX_VALUE_THRESHOLD			150
+
 /****						Constants pi_regulator							****/
 #define PI_REGULATOR_WAIT_TIME			10 //ms so 100Hz
 //coef pi distance
