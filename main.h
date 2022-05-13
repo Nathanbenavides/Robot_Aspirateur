@@ -12,7 +12,7 @@ extern "C" {
 
 //constants for the different parts of the project
 
-//Constants detect_proximity.h
+/****   Constants detect_proximity   ****/
 #define DETECT_PROXIMITY_WAIT_TIME		150
 
 #define PROXIMITY_COLISION_THRESHOLD	300
@@ -27,16 +27,20 @@ extern "C" {
 #define PROXIMITY_ANGLE_7				45	//deg
 #define PROXIMITY_ANGLE_8				10	//deg
 //Approximation of the distance with proximity on black surface
-#define PROX_SLOP_BIG				(-0.0041f)
-#define PROX_OFFSET_BIG				(14.487f)
-#define PROX_SLOP_SMALL				(-0.067f)
-#define PROX_OFFSET_SMALL			(40.54f)
-#define PROX_THRESHOLD				420
+#define PROX_SLOP_BIG					(-0.0041f)
+#define PROX_OFFSET_BIG					(14.487f)
+#define PROX_SLOP_SMALL					(-0.067f)
+#define PROX_OFFSET_SMALL				(40.54f)
+#define PROX_THRESHOLD					420
 //Approximation of the distance with the TOF sensor
-#define TOF_SLOP				0.8733f
-#define TOF_OFFSET				(-4.0459f)
-#define TOF_LIMIT_DIST			35
-#define TOF_CORRECTION(value)	(TOF_SLOP*value+TOF_OFFSET)
+#define TOF_SLOP						0.8733f
+#define TOF_OFFSET						(-4.0459f)
+#define TOF_LIMIT_DIST					35
+#define TOF_CORRECTION(value)			(TOF_SLOP*value+TOF_OFFSET)
+
+/****   Constants line_reasearch   ****/
+#define LINE_RESEARCH_WAIT_TIME			100
+#define TIME_WAIT_SEARCHING_ROTA	(TIME_WAIT_360_DEG + 1000)
 
 
 #define IMAGE_BUFFER_SIZE		640
@@ -64,7 +68,7 @@ extern "C" {
 #define TIME_WAIT_360_DEG		(PI*WHEEL_DISTANCE/WHEEL_PERIMETER*NSTEP_ONE_TURN/LOW_SPEED*1000)
 
 #define TIME_WAIT_CLEANING			30	//sec
-#define TIME_WAIT_SEARCHING_ROTA	(TIME_WAIT_360_DEG + 1000)
+
 #define TIME_WAIT_SEARCHING_MVNT	3	//sec
 
 #define GO_BACK_TIME 			3000

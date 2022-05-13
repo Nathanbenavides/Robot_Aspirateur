@@ -33,7 +33,7 @@ static THD_FUNCTION(DetectProximity, arg) {
 
     	approximate_wall_angle();
 
-    	chThdSleepMilliseconds(150);
+    	chThdSleepMilliseconds(DETECT_PROXIMITY_WAIT_TIME);
     }
 }
 
