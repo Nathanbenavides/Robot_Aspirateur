@@ -40,10 +40,7 @@ static THD_FUNCTION(FindLine, arg) {
 			send(RESEARCH_MVNT);
 		}
 
-		//chprintf((BaseSequentialStream *)&SDU1, "Find Line");
-
-		chThdSleepMilliseconds(100);
-
+		chThdSleepMilliseconds(LINE_RESEARCH_WAIT_TIME);
     }
 }
 
@@ -55,7 +52,7 @@ void find_line_start(void){
 }
 
 void find_line_stop(void){
-	if(findLine_configured == 0) return;
+	if(!findLine_configured) return;
 
 	chThdTerminate(findLineThd);
 	chThdWait(findLineThd);
