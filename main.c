@@ -164,11 +164,12 @@ int main(void)
 	//inits the motors
 	motors_init();
 
-    //proximity_start();
+	//init. of the messagebus used by the proximiy thread
     messagebus_init(&bus, &bus_lock, &bus_condvar);
 
-	//stars the threads for the processing of the image
+	//starts the threads for the processing of the image
 	process_image_start();
+	//starts the treads for getting prox. sensors values and analysing them
 	proximity_start();
 	detect_proximity_start();
 
