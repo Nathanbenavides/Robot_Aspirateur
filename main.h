@@ -10,7 +10,35 @@ extern "C" {
 #include "parameter/parameter.h"
 
 
-//constants for the differents parts of the project
+//constants for the different parts of the project
+
+//Constants detect_proximity.h
+#define DETECT_PROXIMITY_WAIT_TIME		150
+
+#define PROXIMITY_COLISION_THRESHOLD	300
+#define PROXIMITY_FRONT_THRESHOLD		200
+#define PROXIMITY_FRONT_DELTA			100
+#define PROXIMITY_ANGLE_1				-10	//deg
+#define PROXIMITY_ANGLE_2				-45	//deg
+#define PROXIMITY_ANGLE_3				-90	//deg
+#define PROXIMITY_ANGLE_4				-135//deg
+#define PROXIMITY_ANGLE_5				135	//deg
+#define PROXIMITY_ANGLE_6				90	//deg
+#define PROXIMITY_ANGLE_7				45	//deg
+#define PROXIMITY_ANGLE_8				10	//deg
+//Approximation of the distance with proximity on black surface
+#define PROX_SLOP_BIG				(-0.0041f)
+#define PROX_OFFSET_BIG				(14.487f)
+#define PROX_SLOP_SMALL				(-0.067f)
+#define PROX_OFFSET_SMALL			(40.54f)
+#define PROX_THRESHOLD				420
+//Approximation of the distance with the TOF sensor
+#define TOF_SLOP				0.8733f
+#define TOF_OFFSET				(-4.0459f)
+#define TOF_LIMIT_DIST			35
+#define TOF_CORRECTION(value)	(TOF_SLOP*value+TOF_OFFSET)
+
+
 #define IMAGE_BUFFER_SIZE		640
 #define WIDTH_SLOPE				5
 #define MIN_LINE_WIDTH			60
@@ -22,18 +50,9 @@ extern "C" {
 #define GOAL_DISTANCE 			10.0f
 #define MIN_SPEED_MOTOR			150
 
-//TOF Value
-#define TOF_SLOP				0.8733f
-#define TOF_OFFSET				(-4.0459f)
-#define TOF_SMALL_DIST			35
-#define TOF_CORRECTION(value)	(TOF_SLOP*value+TOF_OFFSET)
 
-//Proximity Value
-#define PROX_SLOP_BIG				(-0.0041f)
-#define PROX_OFFSET_BIG				(14.487f)
-#define PROX_SLOP_SMALL				(-0.067f)
-#define PROX_OFFSET_SMALL			(40.54f)
-#define PROX_THRESHOLD				420
+
+
 
 
 #define PI                  	3.1415926536f
