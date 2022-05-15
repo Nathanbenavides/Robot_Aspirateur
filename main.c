@@ -3,12 +3,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <main.h>
-#include <usbcfg.h>
-#include "proximity.h"
-#include "motors.h"
-#include <detect_proximity.h>
-#include <motor_control.h>
 #include "ch.h"
 #include "hal.h"
 #include "memory_protection.h"
@@ -150,9 +144,6 @@ int main(void)
     halInit();
     chSysInit();
     mpu_init();
-    ///////////////////
-    serial_start();
-    usb_start();
 
     //starts the serial communication
     serial_start();
@@ -189,4 +180,3 @@ void __stack_chk_fail(void)
 {
     chSysHalt("Stack smashing detected");
 }
-

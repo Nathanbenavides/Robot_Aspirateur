@@ -48,7 +48,6 @@ build
 .dep
 .project
 .cproject
-.settings/
 Makefile
 
 # Kernel Module Compile Results
@@ -61,4 +60,3 @@ Mkfile.old
 dkms.conf
 
 .settings/
-
